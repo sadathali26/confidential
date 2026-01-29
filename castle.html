@@ -1,0 +1,2596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Welcome Home, Kunjaama</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Indie+Flower&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <style>
+        /* --- GLOBAL STYLES --- */
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100dvh; 
+            overflow: hidden; 
+            background-color: #000000; 
+            user-select: none; 
+            font-family: 'Indie Flower', cursive; 
+            touch-action: none; 
+            cursor: url('cursor.png'), auto; 
+        }
+
+        button, a, .top-icon-btn, .close-tutorial, .close-help, #cat-speech-bubble, .nav-zone, #cat-trigger-btn {
+            cursor: url('cursor.png'), pointer !important;
+        }
+
+        canvas { display: block; width: 100vw; height: 100dvh; }
+        
+        /* --- FADE TO BLACK OVERLAY --- */
+        #black-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 3s ease-in-out;
+        }
+
+        /* --- TOP ICONS --- */
+        .top-icon-btn {
+            position: absolute; top: 20px; 
+            z-index: 3500; 
+            width: 40px; height: 40px;
+            background: transparent; 
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; 
+            border: 2px solid rgba(255, 255, 255, 0.5); 
+            transition: transform 0.2s ease;
+            pointer-events: auto; 
+        }
+        .top-icon-btn:active { transform: scale(0.9); }
+
+        .music-btn-wrapper { left: 20px; }
+        #music-lottie { width: 100%; height: 100%; padding: 6px; }
+        
+        .help-btn-wrapper { right: 20px; }
+        #help-toggle i { color: #ffffff; font-size: 16px; }
+
+        /* --- BOTTOM CAT BUTTON --- */
+        #cat-trigger-btn {
+            display: none; 
+            position: absolute; 
+            bottom: 0; left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            width: 120px; height: 100px; 
+            background: transparent; 
+            border: none;
+            z-index: 3600;
+            cursor: pointer;
+            justify-content: center; 
+            align-items: flex-end; 
+            padding-bottom: 0;
+            opacity: 0;
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease-out;
+        }
+        
+        #cat-trigger-btn.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        #cat-trigger-btn:active { transform: translateX(-50%) scale(0.95); }
+        
+        #cat-trigger-btn img { 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            object-position: bottom; 
+            drop-shadow: 0 -5px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- QUICK INPUT OVERLAY --- */
+        #quick-chat-overlay {
+            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 6000;
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        
+        .quick-input-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 50px;
+            border: 4px solid #f1c40f;
+            display: flex; width: 80%; max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform-origin: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #quick-input {
+            flex: 1; border: none; outline: none;
+            font-size: 20px; font-family: 'Indie Flower', cursive;
+            padding: 5px 10px; color: #2c3e50;
+        }
+
+        #quick-send-btn {
+            background: #f1c40f; color: #2c3e50; border: none;
+            width: 40px; height: 40px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; margin-left: 10px;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold;
+        }
+
+        /* --- DIARY STYLES --- */
+        #diary-overlay {
+            display: none; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fdf6e3; 
+            z-index: 5000;
+            flex-direction: column;
+            color: #2c3e50;
+            overflow: hidden;
+        }
+
+        #diary-overlay::before {
+            content: ""; position: absolute; top:0; left:0; width:100%; height:100%;
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            opacity: 0.5; pointer-events: none;
+        }
+
+        .diary-header {
+            position: absolute; top: 0; left: 0; width: 100%;
+            padding: 15px 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5002;
+            background: rgba(253, 246, 227, 0.9);
+            border-bottom: 2px dashed #d7ccc8;
+        }
+
+        .page-indicator { font-size: 18px; font-weight: bold; color: #8d6e63; }
+        
+        #close-diary-btn {
+            background: #e74c3c; color: white; border: none; 
+            width: 35px; height: 35px; border-radius: 50%; 
+            font-size: 18px; cursor: pointer;
+        }
+
+        #diary-body {
+            position: relative;
+            width: 100%; height: 100%;
+            display: block; 
+            padding: 100px 10% 80px 10%; 
+            box-sizing: border-box;
+            z-index: 5001;
+            overflow-y: auto; 
+            text-align: left;
+        }
+
+        .fade-content { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .diary-main-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 38px; color: #d35400; text-align: center;
+            margin-bottom: 40px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            border-bottom: 3px double #e67e22; padding-bottom: 10px;
+        }
+
+        #diary-text { 
+            font-size: 24px; line-height: 1.8; text-align: left; width: 100%; 
+            color: #2c3e50; font-family: 'Indie Flower', cursive; white-space: normal;
+        }
+        
+        .story-part { margin-bottom: 50px; border-left: 4px solid #f1c40f; padding-left: 20px; }
+
+        .collage-img {
+            border: 8px solid white; box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+            margin: 30px auto; display: block; width: 100%; max-width: 500px; 
+            height: auto; border-radius: 5px; transform: rotate(-1deg);
+        }
+        
+        .img-right { float: right; margin-left: 30px; transform: rotate(2deg); width: 40%; }
+        .img-left { float: left; margin-right: 30px; transform: rotate(-2deg); width: 40%; }
+        .img-center { margin: 40px auto; width: 80%; max-width: 600px; transform: rotate(0deg); }
+
+        .txt-big { font-size: 30px; font-weight: bold; color: #d35400; }
+        .txt-small { font-size: 18px; color: #7f8c8d; font-style: italic; }
+        .txt-loud { font-size: 34px; font-family: 'Special Elite', monospace; color: #c0392b; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            #diary-body { padding: 100px 5% 80px 5%; }
+            #diary-text { font-size: 20px; }
+            .img-right, .img-left { float: none; width: 100%; margin: 20px 0; }
+        }
+
+        .nav-zone { position: absolute; top: 60px; bottom: 0; width: 25%; z-index: 5005; }
+        .nav-left { left: 0; } .nav-right { right: 0; }
+
+        /* --- TYPEWRITER OVERLAY --- */
+        #typewriter-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 20, 20, 0.95); z-index: 6000;
+            justify-content: center; align-items: center; flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .typewriter-machine-container {
+            position: relative; width: 85%; max-width: 700px; height: 80vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .paper-sheet {
+            width: 100%; height: 80%; background: #fffdf0;
+            padding: 30px 40px; box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-family: 'Special Elite', monospace; font-size: 22px; color: #1a1a1a;
+            overflow-y: auto; border-radius: 2px 2px 0 0; position: relative; z-index: 10;
+            line-height: 36px;
+            background-image: repeating-linear-gradient(#fffdf0 0px, #fffdf0 35px, #d1ccc0 36px);
+            background-attachment: local;
+        }
+
+        .letter-header { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 15px; padding-bottom: 5px; width: 100%; display: block; }
+
+        #typewriter-input {
+            width: 100%; height: calc(100% - 60px); border: none; background: transparent;
+            font-family: inherit; font-size: inherit; color: inherit;
+            resize: none; outline: none; line-height: 36px; caret-color: #c0392b;
+        }
+
+        .platen-assembly {
+            width: 110%; height: 60px; background: linear-gradient(180deg, #111, #333 40%, #111);
+            border-radius: 10px; position: relative; z-index: 20; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: flex-start;
+            margin-top: -10px;
+        }
+
+        .type-scale {
+            width: 80%; height: 25px; background: linear-gradient(to bottom, #bdc3c7, #95a5a6);
+            border: 1px solid #7f8c8d; margin-top: -12px; position: relative; z-index: 21;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+        }
+        
+        .type-scale::after {
+            content: "||||||||||||||||||||||||||||||||||"; color: #2c3e50; letter-spacing: 5px; font-size: 10px; font-weight: bold; opacity: 0.6;
+        }
+
+        #typewriter-hammer {
+            position: absolute; bottom: 0; left: 50%; width: 12px; height: 50px;
+            background: #555; border-radius: 2px; transform: translateX(-50%) translateY(40px);
+            z-index: 22; transition: transform 0.05s ease-out;
+        }
+        
+        #typewriter-hammer::before {
+            content: ''; position: absolute; top: 0; left: -6px; width: 24px; height: 15px; background: #222; border-radius: 2px;
+        }
+
+        .hammer-strike { transform: translateX(-50%) translateY(-20px) !important; }
+
+        .send-letter-btn {
+            margin-top: 30px; padding: 15px 40px; background: #27ae60; color: white;
+            font-family: 'Indie Flower', cursive; font-size: 24px; font-weight: bold;
+            border: 4px solid #2ecc71; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.1s; z-index: 30;
+        }
+        .send-letter-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .shake-anim { animation: paperJiggle 0.1s ease-out; }
+        @keyframes paperJiggle { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
+
+        /* --- FRAME IMAGE VIEWER --- */
+        #frame-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 6000;
+            justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px);
+        }
+
+        .frame-container {
+            position: relative; background: #f4e4bc; padding: 20px;
+            border: 15px solid #5d4037; border-radius: 10px;
+            box-shadow: 0 0 0 5px #3e2723, 0 20px 50px rgba(0,0,0,0.5); 
+            max-width: 90%; max-height: 80vh;
+            display: flex; flex-direction: column; align-items: center;
+            animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .frame-container img { max-width: 100%; max-height: 60vh; border: 2px solid #8d6e63; display: block; }
+
+        #close-frame-btn {
+            position: absolute; top: -25px; right: -25px; width: 40px; height: 40px;
+            background: #e74c3c; color: #fff; border: 3px solid #fff; border-radius: 50%;
+            font-size: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        #download-frame-btn {
+            margin-top: 15px; padding: 10px 25px; background: #27ae60; color: white;
+            text-decoration: none; font-weight: bold; border-radius: 50px; border: 2px solid #2ecc71;
+            font-size: 18px; display: inline-block; box-shadow: 0 4px 0 #1e8449; transition: transform 0.1s;
+        }
+        #download-frame-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- POPUP STYLES --- */
+        .story-popup {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 500px; background: #fffcec; color: #2c3e50;
+            border-radius: 15px; border: 4px solid #2c3e50; z-index: 4000;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); overflow: hidden;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-content { display: flex; align-items: stretch; }
+
+        .popup-left {
+            flex: 1; background: #e6dfcc; display: flex; justify-content: center; align-items: center;
+            padding: 10px; border-right: 2px dashed #ccc;
+        }
+        .popup-left img { width: 100%; max-width: 120px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transform: rotate(-3deg); border: 2px solid #fff; }
+
+        .popup-right { flex: 2; padding: 20px; text-align: left; }
+
+        .cat-header { display: flex; align-items: center; margin-bottom: 10px; font-weight: bold; color: #7f8c8d; font-size: 14px; }
+        .cat-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #f1c40f; margin-right: 10px; }
+
+        .story-popup h3 { margin: 0 0 10px 0; color: #e67e22; font-size: 22px; }
+        .story-popup p { font-size: 16px; margin: 8px 0; line-height: 1.4; }
+        
+        .close-tutorial {
+            width: 100%; margin-top: 0; padding: 12px; background: #f1c40f; color: #2c3e50; font-weight: bold;
+            border: none; border-top: 2px solid #2c3e50; font-family: 'Indie Flower', cursive; font-size: 18px; 
+        }
+        .close-tutorial:active { background: #d4ac0d; }
+
+       /* --- MOBILE: KEEP DESKTOP RATIO (SCALED DOWN) --- */
+        @media (max-width: 600px) {
+            .story-popup {
+                width: 95%;           /* Use full width of phone */
+                max-width: 380px;     /* Cap it so it doesn't look weird */
+            }
+
+            /* FORCE ROW LAYOUT (Same as Desktop) */
+            .popup-content { 
+                flex-direction: row; 
+                align-items: stretch;
+            }
+
+            /* Left Side (Image) - 30% Width */
+            .popup-left { 
+                flex: 0 0 35%;        /* Fixed percentage width */
+                padding: 5px;         /* Tiny padding */
+                border-right: 1px dashed #ccc; 
+                border-bottom: none;  /* Remove stacked border */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .popup-left img { 
+                max-width: 100%;      /* Fit inside the small box */
+                border-radius: 5px;
+            }
+
+            /* Right Side (Text) - 70% Width */
+            .popup-right { 
+                flex: 1; 
+                padding: 10px; 
+            }
+
+            /* SCALED DOWN FONTS */
+            .story-popup h3 { 
+                font-size: 16px;      /* Smaller Title */
+                margin-bottom: 4px; 
+            }
+            
+            .story-popup p { 
+                font-size: 12px;      /* Smaller Text */
+                line-height: 1.3;
+                margin: 4px 0;
+            }
+
+            .cat-header {
+                font-size: 10px;
+                margin-bottom: 2px;
+            }
+            
+            .cat-avatar {
+                width: 18px; height: 18px;
+                margin-right: 5px;
+            }
+
+            /* Button */
+            .close-tutorial {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+
+        @keyframes popIn { from { transform: translate(-50%, -40%) scale(0.8); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+        /* --- SPEECH BUBBLE --- */
+        #cat-speech-bubble {
+            display: none; position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.95); color: #fff; padding: 20px;
+            border-radius: 30px; max-width: 85%; text-align: center; font-size: 20px;
+            z-index: 3500; border: 3px solid #f1c40f; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            animation: floatUp 0.5s ease-out; pointer-events: auto; transition: transform 0.1s;
+        }
+        
+        #cat-speech-bubble:active { transform: translateX(-50%) scale(0.95); }
+        
+        #cat-speech-bubble::after {
+            content: ''; position: absolute; bottom: -12px; left: 50%; margin-left: -12px;
+            border-width: 12px 12px 0; border-style: solid; border-color: #f1c40f transparent;
+            display: block; width: 0;
+        }
+
+        @keyframes floatUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+        /* --- HELP MODAL --- */
+        #help-modal {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; max-width: 400px; background: #fff; color: #2c3e50;
+            padding: 20px; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            border: 3px solid #2c3e50; text-align: center; z-index: 4000;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+        }
+        #help-modal h2 { margin-top: 0; border-bottom: 2px dashed #ccc; padding-bottom: 10px; }
+        #help-modal p { font-size: 18px; margin: 10px 0; }
+        .close-help {
+            margin-top: 15px; padding: 5px 20px; background: #e74c3c; color: white;
+            border: none; border-radius: 10px; font-family: inherit; font-size: 18px; 
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loader {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #ecf0f1; z-index: 3000; text-align: center; padding: 20px; box-sizing: border-box; 
+        }
+        #loading-text { font-size: 28px; letter-spacing: 1px; margin-bottom: 30px; max-width: 90%; line-height: 1.6; min-height: 100px; font-style: italic; }
+        #progress-bar { width: 300px; height: 12px; background: rgba(255,255,255,0.2); border-radius: 20px; overflow: hidden; border: 2px solid #ecf0f1; }
+        #progress-fill { width: 0%; height: 100%; background: #f1c40f; transition: width 0.2s ease-out; }
+        #error-msg { color: #e74c3c; margin-top: 15px; font-size: 18px; }
+
+        /* --- START SCREEN --- */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 2000; transition: opacity 2s ease-in-out; opacity: 1;
+        }
+        #start-btn {
+            padding: 20px 60px; font-size: 32px; font-family: 'Indie Flower', cursive; font-weight: bold;
+            color: #2c3e50; background: #ecf0f1; border: 4px solid #bdc3c7; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+            cursor: pointer; box-shadow: 4px 4px 0px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        #start-btn:active { transform: scale(0.95); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+
+        /* --- INTERACTION POPUP --- */
+        #interaction-popup {
+            position: absolute; top: 25%; left: 50%; transform: translateX(-50%);
+            background: #fff; color: #2c3e50; padding: 15px 40px;
+            font-size: 24px; font-weight: bold; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+            display: none; pointer-events: none; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            animation: floatUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid #2c3e50; text-align: center; width: max-content; max-width: 80%;
+        }
+        #interaction-popup::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; margin-left: -10px;
+            border-width: 10px 10px 0; border-style: solid; border-color: #2c3e50 transparent; display: block; width: 0;
+        }
+        @keyframes floatUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+        /* --- CROSSHAIR --- */
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 12px; height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 50%; 
+            transform: translate(-50%, -50%); pointer-events: none; display: none; 
+        }
+        @media (hover: hover) { #crosshair { display: block; } }
+
+        /* --- ROTATE WARNING --- */
+        #rotate-warning {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center; color: #ecf0f1; text-align: center;
+        }
+        @media screen and (orientation: portrait) and (max-width: 900px) { #rotate-warning { display: flex; } }
+
+        /* --- MOBILE: MAKE CAT TALK BUBBLE SMALLER --- */
+        @media (max-width: 800px) {
+            #cat-speech-bubble {
+                bottom: 15%;          /* Move it down a bit */
+                width: 90%;           /* Use more width to reduce height */
+                max-width: 300px;     /* Cap the size */
+                padding: 10px 15px;   /* Reduce padding inside */
+                font-size: 14px;      /* Smaller text (was 20px) */
+                border-width: 2px;    /* Thinner border */
+                line-height: 1.3;     /* Tighter lines */
+            }
+
+            /* Make the little triangle pointer smaller too */
+            #cat-speech-bubble::after {
+                border-width: 8px 8px 0; 
+                bottom: -8px;
+                margin-left: -8px;
+            }
+            /* --- MOBILE: SMALLER CAT TRIGGER BUTTON --- */
+            #cat-trigger-btn {
+                width: 90px !important;   /* Reduced from 120px */
+                height: 70px !important;  /* Reduced from 100px */
+                bottom: 0px !important;  /* Keep it close to bottom */
+            }
+        }
+
+
+        /* --- FINAL ENDING SCREENS --- */
+        #final-mandhi-screen, #final-troll-screen {
+            display: none; /* Hidden by default */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; z-index: 10000; /* On top of everything */
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: white;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .final-img {
+            width: 150px; height: auto; margin-bottom: 20px;
+            border-radius: 10px; 
+        }
+
+        .final-text {
+            font-size: 22px; color: #ecf0f1; margin-bottom: 30px;
+            font-family: 'Indie Flower', cursive; line-height: 1.5;
+        }
+
+        .qr-container {
+            background: rgb(0, 0, 0); padding: 10px; border-radius: 10px;
+            margin-bottom: 30px; display: flex; flex-direction: column; align-items: center;
+        }
+        .qr-container img { width: 180px; height: 180px; }
+
+        #sorry-btn {
+            background: #e74c3c; color: white; border: none;
+            padding: 15px 40px; font-size: 20px; font-family: 'Indie Flower', cursive;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            transition: transform 0.1s;
+        }
+        #sorry-btn:active { transform: scale(0.95); }
+
+        .troll-text {
+            font-size: 40px; color: #fff; font-family: 'Indie Flower', cursive;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        
+    </style>
+</head>
+<body>
+
+    <div id="rotate-warning">
+        <div style="font-size: 60px;">↻</div>
+        <h2>Please Rotate<br>Your Device</h2>
+    </div>
+
+    <div id="black-overlay"></div>
+
+    <audio id="bg-music" src="bg-musics/track1.ogg"></audio>
+    <audio id="radio-audio"></audio>
+    <audio id="page-sfx" src="page-flip.mp3"></audio>
+
+    <div class="top-icon-btn music-btn-wrapper" id="music-toggle">
+        <lottie-player id="music-lottie" src="doodle-black-110-music-album-hover-pinch.json" background="transparent" speed="1" loop></lottie-player>
+    </div>
+
+    <div class="top-icon-btn help-btn-wrapper" id="help-toggle">
+        <i class="fa-solid fa-question"></i>
+    </div>
+
+    <div id="cat-trigger-btn">
+        <img src="cat_transparent.png" alt="Chat with Babblu">
+    </div>
+
+    <div id="quick-chat-overlay">
+        <div class="quick-input-box">
+            <input type="text" id="quick-input" placeholder="Say something to Babblu... 🐾">
+            <button id="quick-send-btn">➤</button>
+        </div>
+    </div>
+
+    <div id="diary-overlay">
+        <div class="diary-header">
+            <span class="page-indicator" id="page-indicator">Page 1 / 3</span>
+            <button id="close-diary-btn">✕</button>
+        </div>
+        <div id="diary-body"></div>
+        <div class="nav-zone nav-left" id="prev-page-zone"></div>
+        <div class="nav-zone nav-right" id="next-page-zone"></div>
+    </div>
+    
+
+    <div id="typewriter-overlay">
+        <div class="typewriter-machine-container">
+            <div class="paper-sheet">
+                <span class="letter-header">To: Sadath Ali</span>
+                <textarea id="typewriter-input" placeholder="Type your letter here..."></textarea>
+            </div>
+            <div class="platen-assembly">
+                <div class="type-scale"></div>
+                <div id="typewriter-hammer"></div>
+            </div>
+        </div>
+        <button class="send-letter-btn" id="send-letter-btn">Send to Best Friend 🦅</button>
+    </div>
+
+    <div id="frame-overlay">
+        <div class="frame-container">
+            <button id="close-frame-btn">✕</button>
+            <img id="frame-display-img" src="" alt="Memory">
+            <a id="download-frame-btn" href="#" download>Keep this Memory 🌸</a>
+        </div>
+    </div>
+
+    <div id="controls-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="controls_photo.png" alt="Controls"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Welcome Home! 😺</h3>
+                <p>Feel free to walk around your castle!</p>
+                <p>📱 <b>Mobile:</b> Drag Left Side to Move, Right Side to Look. Double Tap to Jump!</p>
+                <p>🎵 <b>Music:</b> Tap the Note icon to Pause. Double Tap it to change the song!</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="close-controls-btn">I am ready to explore!</button>
+    </div>
+
+    <div id="frame-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="frame_tutorial.png" alt="Frames"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Memories on Wall 🖼️</h3>
+                <p>Psst, Little One! 🐾</p>
+                <p>You can collect these paintings if you like them... but don't take them all, okay?</p>
+                <p>Leave some for me! 😸</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="close-frame-tutorial-btn">Okay, I will look!</button>
+    </div>
+
+    <div id="radio-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="radio_photo.png" alt="Radio"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Hey Jaanu! 🎵</h3>
+                <p>Do you see this antique radio? It belonged to the <b>Creator</b> of this castle. He never went anywhere without his tunes!</p>
+                <p>I think you will love the melodies it holds. Why not give it a listen?</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="close-radio-btn">Okay, I'll check it!</button>
+    </div>
+
+    <div id="book-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="book_photo.png" alt="Book"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>A Royal Album 📖</h3>
+                <p>Look at that book there! It is the personal album of the <b>King</b> (The Creator).</p>
+                <p>He captured so many memories inside. Feel free to open it!</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="close-book-btn">Okay, interesting!</button>
+    </div>
+
+    <div id="typewriter-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="typewriter_photo.png" alt="Typewriter"></div>
+          <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Hey Miss! 😸</h3>
+                <p>You can use this typewriter to send letters to your <b>Best Friend!</b> 💌</p>
+                <p>We bought this from the <b>Kingdom Above the Mountain</b>. It has a magical history! ✨</p>
+                <p>Also... my buddy said you don't even know how to write a letter and sent it properly! 😹 Show him he is wrong!</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="open-typewriter-btn">I will send a letter!</button>
+    </div>
+
+    <div id="door-tutorial" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="door_photo.png" alt="Door"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Heeyy.... 😿</h3>
+                <p>I don't want to, but... you can use the door if you want to go.</p>
+                <p>I hope you will come to visit me, you were good company to me. 😿💔</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="close-door-tutorial-btn">Okay, I'll stay!</button>
+    </div>
+
+    <div id="door-exit-modal" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="door_photo.png" alt="Door"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>Are you leaving? 😿</h3>
+                <p>The journey outside is long... are you sure you want to go?</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="stay-btn" style="background:#2ecc71; color:white;">I'll stay with you! ❤️</button>
+        <button class="close-tutorial" id="leave-btn" style="background:#e74c3c; margin-top:5px; color:white;">I promise to visit! 💔</button>
+    </div>
+
+    <div id="book-entry-modal" class="story-popup">
+        <div class="popup-content">
+            <div class="popup-left"><img src="book_photo.png" alt="Book Open"></div>
+            <div class="popup-right">
+                <div class="cat-header"><img src="cat.png" alt="Cat" class="cat-avatar"><span>Babblu says:</span></div>
+                <h3>The Creator's Album</h3>
+                <p>This book contains precious memories.</p>
+                <p>Would you like to open it?</p>
+            </div>
+        </div>
+        <button class="close-tutorial" id="open-diary-btn">Open Album</button>
+        <button class="close-tutorial" style="background:#e74c3c; margin-top:5px;" id="close-book-modal-btn">Close</button>
+    </div>
+
+    <div id="cat-speech-bubble"></div>
+
+    <div id="help-modal">
+        <h2>How to Move</h2>
+        <p><b>Mobile:</b> Left side to Walk, Right to Look</p>
+        <p><b>Computer:</b> WASD to Walk, Mouse to Look</p>
+        <button class="close-help" id="close-help-btn">Got it!</button>
+    </div>
+
+    <div id="loader">
+        <div id="loading-text">Welcome back, Kunjaama! Let me find the keys...</div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="error-msg"></div>
+    </div>
+
+    <div id="start-screen">
+        <button id="start-btn">Come In, Kunjeeee...</button>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="interaction-popup">Found something!</div>
+
+    <div id="final-mandhi-screen">
+        <img src="mandhi.png" class="final-img" alt="Please?">
+        
+        <p class="final-text">
+            yendhaayalum poovallleee... <br>
+            Ithiri sneehm ndenki oru mandhi meedcheruoo? 🍗🥺
+        </p>
+
+        <div class="qr-container">
+            <img src="qrcode.jpg" alt="GPay QR Code">
+            <span style="font-size:12px; color:#bdc3c7;">nalla thathalle....</span>
+        </div>
+
+        <button id="sorry-btn">sorry pattoolattaa...</button>
+    </div>
+
+    <div id="final-troll-screen">
+        <h1 class="troll-text">
+            njanjanjanjanja......<br>
+            <span style="font-size: 30px; color: #ffffff;">yendh maama aadooo!</span>
+        </h1>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+        import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+        import { Octree } from 'three/addons/math/Octree.js';
+        import { Capsule } from 'three/addons/math/Capsule.js';
+
+        // --- CONFIGURATION ---
+        const SPAWN_POINT = new THREE.Vector3(15.66, 0.5, -0.26); 
+        const PLAYER_HEIGHT = 0.9; 
+        const PLAYER_RADIUS = 0.35;
+        const PLAYER_SPEED = 12; 
+        const JUMP_FORCE = 6;
+        const GRAVITY = 20;
+        const BOB_FREQUENCY = 12;  
+        const BOB_AMPLITUDE = 0.01; 
+
+        // --- GROQ API SETUP ---
+        const GROQ_API_KEY = "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"; 
+        const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+        const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+        let chatContext = []; 
+        const MAX_HISTORY = 20; 
+
+        // --- INITIALIZE EMAILJS ---
+        emailjs.init("ikJuGIV_vM8wkLR4o");
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x88ccee);
+        scene.fog = new THREE.Fog(0x88ccee, 0, 50);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = Math.PI / 2; 
+
+        const ambientLight = new THREE.AmbientLight(0x6688cc);
+        scene.add(ambientLight);
+
+        const fillLight = new THREE.DirectionalLight(0xffffff, 1);
+        fillLight.position.set(-5, 25, -1);
+        fillLight.castShadow = true;
+        fillLight.shadow.bias = -0.001;
+        fillLight.shadow.mapSize.width = 1024;
+        fillLight.shadow.mapSize.height = 1024;
+        scene.add(fillLight);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.VSMShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        document.body.appendChild(renderer.domElement);
+
+        // --- PHYSICS SETUP ---
+        const worldOctree = new Octree();
+        const playerCollider = new Capsule(
+            new THREE.Vector3(0, 0.35, 0),
+            new THREE.Vector3(0, PLAYER_HEIGHT + 0.35, 0),
+            PLAYER_RADIUS
+        );
+
+        const playerVelocity = new THREE.Vector3();
+        const playerDirection = new THREE.Vector3();
+        let playerOnFloor = false;
+        let isGameReady = false;
+        let headBobTimer = 0;
+
+        // --- CONTROLS ---
+        const keyStates = {};
+        let moveTouchID = -1; 
+        let lookTouchID = -1; 
+        let lastTapTime = 0;
+        let moveInput = { x: 0, y: 0 }; 
+        let moveOrigin = { x: 0, y: 0 }; 
+        let lookOrigin = { x: 0, y: 0 };
+
+        document.addEventListener('keydown', (event) => { keyStates[event.code] = true; });
+        document.addEventListener('keyup', (event) => { keyStates[event.code] = false; });
+
+        // --- UI & AUDIO ---
+        const loaderScreen = document.getElementById('loader');
+        const loadingText = document.getElementById('loading-text');
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const blackOverlay = document.getElementById('black-overlay');
+        
+        const bgAudio = document.getElementById('bg-music');
+        const radioAudio = document.getElementById('radio-audio');
+        const pageSfx = document.getElementById('page-sfx');
+        
+        const musicBtn = document.getElementById('music-toggle');
+        const musicLottie = document.getElementById('music-lottie');
+        const helpBtn = document.getElementById('help-toggle');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        
+        // --- POPUPS ---
+        const controlsPopup = document.getElementById('controls-tutorial');
+        const radioPopup = document.getElementById('radio-tutorial');
+        const bookPopup = document.getElementById('book-tutorial');
+        const typewriterPopup = document.getElementById('typewriter-tutorial');
+        const framePopup = document.getElementById('frame-tutorial'); 
+        const bookEntryModal = document.getElementById('book-entry-modal');
+        const doorPopup = document.getElementById('door-tutorial');
+        const doorExitModal = document.getElementById('door-exit-modal');
+        const speechBubble = document.getElementById('cat-speech-bubble');
+        
+        const diaryOverlay = document.getElementById('diary-overlay');
+        const diaryBody = document.getElementById('diary-body');
+        const pageIndicator = document.getElementById('page-indicator');
+        const openDiaryBtn = document.getElementById('open-diary-btn');
+        const closeDiaryBtn = document.getElementById('close-diary-btn');
+        const prevPageZone = document.getElementById('prev-page-zone');
+        const nextPageZone = document.getElementById('next-page-zone');
+
+        // Typewriter Elements
+        const typewriterOverlay = document.getElementById('typewriter-overlay');
+        const typewriterInput = document.getElementById('typewriter-input');
+        const sendLetterBtn = document.getElementById('send-letter-btn');
+        const typewriterHammer = document.getElementById('typewriter-hammer');
+
+        // Frame Image Viewer Elements
+        const frameOverlay = document.getElementById('frame-overlay');
+        const frameImg = document.getElementById('frame-display-img');
+        const closeFrameBtn = document.getElementById('close-frame-btn');
+        const downloadFrameBtn = document.getElementById('download-frame-btn');
+
+        const closeControlsBtn = document.getElementById('close-controls-btn');
+        const closeRadioBtn = document.getElementById('close-radio-btn');
+        const closeBookBtn = document.getElementById('close-book-btn');
+        // This is the button inside the Typewriter Poster
+        const openTypewriterBtn = document.getElementById('open-typewriter-btn');
+        const closeFrameTutorialBtn = document.getElementById('close-frame-tutorial-btn');
+        const closeBookModalBtn = document.getElementById('close-book-modal-btn'); 
+        const closeDoorTutorialBtn = document.getElementById('close-door-tutorial-btn');
+        
+        const stayBtn = document.getElementById('stay-btn');
+        const leaveBtn = document.getElementById('leave-btn');
+
+        // Chat Elements (Simple Input)
+        const catTriggerBtn = document.getElementById('cat-trigger-btn');
+        const quickChatOverlay = document.getElementById('quick-chat-overlay');
+        const quickInput = document.getElementById('quick-input');
+        const quickSendBtn = document.getElementById('quick-send-btn');
+
+        // --- PLAYLISTS ---
+        const bgPlaylist = [
+            'bg-musics/track1.ogg', 'bg-musics/track2.ogg', 'bg-musics/track3.ogg',
+            'bg-musics/track4.ogg', 'bg-musics/track5.ogg', 'bg-musics/track6.ogg',
+            'bg-musics/track7.ogg', 'bg-musics/track8.ogg', 'bg-musics/track9.ogg'
+        ];
+        
+        const radioPlaylist = [
+            'radio_tracks/song1.mp3', 
+            'radio_tracks/song2.mp3' 
+        ];
+        
+        let bgTrackIndex = 0;
+        let radioTrackIndex = -1; 
+        let clickTimer = null; 
+        const TARGET_VOLUME = 0.4;
+
+        // --- STATE TRACKING ---
+        let radioObject = null;
+        let isPopupOpen = false;
+        let isDiaryOpen = false;
+        
+        let hasClickedRadio = false;
+        let hasClickedBook = false;
+        let hasClickedTypewriter = false; 
+        let hasClickedFrame = false; 
+        let hasOpenedDiary = false; 
+        
+        let isRadioPlaying = false;
+
+        // TIMELINE VARIABLES
+        let currentTimelineStep = 0; 
+        let timelineTimer = null;
+        let nextEventDelay = 7000; 
+        
+        // Track displayed posters
+        let hasShownRadioPoster = false;
+        let hasShownBookPoster = false;
+        let hasShownTypewriterPoster = false;
+
+        // --- 50 UNIQUE CAT DIALOGUES (FRIENDLY GUARDIAN VERSION) ---
+        // --- 50 UNIQUE CAT DIALOGUES (UPDATED) ---
+        const randomCatTalks = [
+            "You walk so funny! Like a penguin! 🐧",
+            "How are you this cute, my maaaa? 😻",
+            "Do you have any fish? No? Okay... 🐟",
+            "I've been waiting for a decade! You only come now? Where were you? 😴",
+            "Where is your actual place? u r not from wayanad right? Sir said you don't have an actual place! 🧐",
+            "Why are you such a shorty? By the way, you look cute too! 😼",
+            "How do you feel? You look dull... or is that just your happy face? 😹",
+            "I am the ferocious guardian! Fear me! ...Rawr? 🦁",
+            "Hey, stop running around! I'm getting dizzy! 😵‍💫",
+            "I am the boss of this castle. You are the guest! 😼",
+            "Did you bring any treats? No? Unbelievable. 😿",
+            "Humans are usually so tall... but not you. 😹",
+            "The Master spent days making that window just right. 🪟",
+            "This Typewriter is older than my great-grandfather! 📠",
+            "The Master used to listen to this radio a lot. 📻",
+            "We bought that rug from a flying merchant! 🧞‍♂️",
+            "The Master said you love stories. Is that true? 📚",
+            "I promised the Master I wouldn't scratch the sofa. 🛋️",
+            "The Master was very proud of this place. 🏰",
+            "This place is a memory frozen in time. ⏳",
+            "Everything here has a story to tell. 📜",
+            "Did you hear that? Probably just the wind... 🌬️",
+            "Sometimes the lights flicker when I purr. 💡",
+            "I think the frames are watching us... 👀",
+            "It's so quiet... I like it. 🤫",
+            "Don't get lost in the hallway! 🕯️",
+            "The stars look brighter from this castle, don't they? ✨",
+            "This place feels timeless, doesn't it? 🕰️",
+            "Nice outfit! Very practical for exploring. 🎒",
+            "Try not to break anything, okay? 🏺",
+            "I am keeping watch for intruders. You are safe! 🛡️",
+            "It is good to have some company here. 😺",
+            "You are doing great! Keep exploring! 🗺️",
+            "Don't mind the dust, I haven't cleaned in a while. 🧹",
+            "Make yourself at home, Ms. PK! 🏠",
+            "I am watching the perimeter. All clear! 🦅",
+            "Are you going to read the book? 📘",
+            "Try the typewriter! It makes a satisfying click! ⌨️",
+            "The music on the radio is a vibe, right? 🎵",
+            "Look at the photos on the wall! So many memories. 📸"
+        ];
+
+
+        // Get the raw JSON string from storage
+    const storedData = sessionStorage.getItem('collectedWrongNames');
+    
+    // Default text if no names were collected
+    let friendList = "adharsh,kadheeja,ansar,rena...."; 
+
+    if (storedData) {
+        // Parse the string back into an Array of Objects
+        const wrongGuessesArray = JSON.parse(storedData);
+        
+        // Extract ONLY the names using .map()
+        const namesOnly = wrongGuessesArray.map(item => item.name);
+        
+        // If the array isn't empty, join them with commas
+        if (namesOnly.length > 0) {
+            friendList = namesOnly.join(", ");
+        }
+    }
+        // --- DIARY CONTENT (PLACEHOLDER FOR USER) ---
+       const diaryContent = [
+            
+            {
+                text: `
+                <div class="diary-main-title">kunjaama</div>
+                <div class="story-part">
+                    I was literally in the mall, just peacefully looking for a dress 🛍️. No stress, no worries, <span class="txt-small">brain fully switched off.</span> I was checking one dress, then another, imagining how I’ll look, full calm mode. 
+                    <br><br>
+                    <img src="./book_images/img1.jpeg" class="collage-img img-right">
+                    Appo nnndddd… phone starts vibrating. Once. Twice. Thrice. And then it just didn’t stop 📱📱📱. Call cominggg and cominggg! Dilrubim oole seniorsum… kandoor okke koodi call cheythu enne kolappayi. My phone was crying more than me. I was like, <span class="txt-big">enthonnede ithu?</span>
+                </div>
+                
+                <div class="story-part">
+                    The thing is, I already told them like a thousand times that I’m <span class="txt-loud">NOT</span> going to this 7-day camp in St. Joseph’s, Bangalore. I don’t even know the exact place 😭. Bangalore evide? City center aano? Jungle aano? Some random outer area aano? I just gave my name in yeetho oru hall-il when Ansar casually asked, like yeah yeah ok ok, and now suddenly I’m fully trapped.
+                    <br><br>
+                    <img src="./book_images/img2.jpeg" class="collage-img img-left">
+                    I gave so many excuses that day. Attendance, exams, headache, fever, future plans, past trauma, everything. But they were fully motivated NPCs repeating only one dialogue:
+                    <br>
+                    <i>“You will not get this opportunity in your entire life.”</i>
+                    <br><br>
+                    <span class="txt-loud">Auuuuu 😩</span>
+                    <br>
+                    Bro, I’m not even 1% interested. Not 0.9, not 0.5, straight zero. My soul rejected it. Worst part? I had just bunked a class for some meeting, thinking of free attendance😎. And now suddenly I have to go to Bangalore?? Exams are day after tomorrow.after some times, i thought why not, give it a try, next onn...the tasks is like  , we have to go university  full chaos: medical report, packing, ticket booking, signatures, calls, tension. <span class="txt-big">Full trip shitsss.</span> By evening itself I was already tired like Im done.
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    I went back to the hostel to pack, already <span class="txt-small">half dead 🫠</span>, and then I realised something that broke me emotionally. All my clothes were in the laundry. <span class="txt-loud">ALL.</span> My bag looked empty like my motivation. I just stared at it for two seconds in silence.
+                    <br><br>
+                    <img src="./book_images/img3.jpeg" class="collage-img img-right">
+                    I packed whatever random things I could find. Oe Inside my head I was like, eeehhh… I don’t wanna go. My only plan,was this: I’ll somehow survive for 1.5 days, then escape for Bangalore “scenes” 😌. That thought alone gave me strength.
+                </div>
+
+                <div class="story-part">
+                    Train was at 6:30 PM 🚆. I got into a bus, and bro… the driver was literally sleeping while driving 😭. His eyes were half closed, head nodding, <span class="txt-big">full horror movie vibe.</span> I was holding my bag and my life together. By the time I reached the station, the train had already started moving. My heart dropped. Somehow, with panic energy and God’s blessings, I jumped in and made it. I don’t even remember now.
+                    <br><br>
+                    <img src="./book_images/img4.jpeg" class="collage-img img-left">
+                    we where 6 people, it was a good trip with them , At least familiar faces. There were two other girls, Dilruba and Jennet. Athe vare kandittilla, but okay vibes. We sat, talked about college nonsense, complained about everything, laughed a bit,and eating and eatingg, u knoow, there is too much to talk, some private talks too , cant say to outsiders..😌, and then finally slept. Honestly, good sleep after full tension. That was nice 😴.
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Morning we reached Yeshwanthpur station. <span class="txt-loud">Eethaaaa station!</span> I’ve never been there before. Everything felt huge, loud, and confusing. we wokeup and brush, u knooww,its my first experience, prayered in the train, i have the train photos till now, kaanaan nalla resaa..We freshup from the train and walk through the platform, no idea , kore yelloom alkarood choich nadannu
+                    <br><br>
+                    <img src="./book_images/img5.jpeg" class="collage-img img-center">
+                    Suddenly, a railway guard stopped us and asked for tickets. Kalla lakshanam kandittano entho.
+
+                </div>
+
+                <div class="story-part">
+                    Atlast , yeggne areela ,get getout of that, its another place, there is way crowded in 7.00am, we saw the busses and people standing literally one above another on the road 😵. Bangalore morning scenes were something else. We took a bus. Long ride. No food. Stomach empty, brain empty. We walked for what felt like forever until we found a hotel. I swear, I don’t know if it was hunger or magic, but the food tasted <span class="txt-loud">AMAZING 😭❤️.</span> Like five-star level in that moment.
+                    <br><br>
+                    <img src="./book_images/img6.jpeg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Then we went to some bus stand and waited for 1.5 hours. Standing, sitting, checking phone, sighing. Sherikkum exhausted aayi. We kept calling the driver. That shit man didn’t pick up at all. No calls, no messages, nothing. After what felt like one full yuga, he finally arrived in a Traveller.
+                    <br><br>
+                    <img src="./book_images/img7.jpeg" class="collage-img img-left">
+                    Inside were some guys who looked like they were going to a <span class="txt-big">death party 💀.</span> Full serious faces, no emotions. Meanwhile, we were the only ones laughing and talking,pandaram vandi vannalloo..., still trying to stay positive.... The driver suddenly took a side road. And then… <span class="txt-loud">wollllaaaa 😭.</span>
+                </div>
+
+                <div class="story-part">
+                    It looked like a factory area in the middle of a Sahara Desert. No trees, no green, just sun, grey grass, and sadness. Big electricity lines everywhere. Abandoned play areas looking depressed. I was like, I am doomed. This place looked like a jail. A proper “shit box” jail standing alone in the desert. My Bangalore city enjoyment plan died right there. I didn’t know whether to cry, scream, or just sleep forever.
+                    <br><br>
+                    Inside, the building was cuby style with a big gate. Looked like a boys’ hostel with no beds 🫠. But okay, campus was clean, and shockingly, the toilet was actually decent. Pazhaya campile bathroom orthaal… 🤧 instant trauma.
+                    <br><br>
+                    <img src="./book_images/img8.jpeg" class="collage-img img-center">
+                </div>`
+            },
+           {
+                text: `
+                <div class="story-part">
+                    Yo, so I reached this camp place, right? First I was like... <span class="txt-loud">adipoli paranoid</span>. Didn't know anyone properly. Just taking photos on phone, sticking close to my roommates like a lost puppy in phone.
+                    <br><br>
+                    But then something crazy happened. These Bangalore dudes came up to me trying to be all friendly-friendly. And I'm not even joking bro, suddenly I became some kind of u knooww...! ✨ Even the Punjabi girls were giving looks. <span class="txt-loud">Ente ammoo, enikk vayya!</span>
+                    <br><br>
+                    <img src="./book_images/img9.jpeg" class="collage-img img-center">
+                     But here's my problem da. <span class="txt-big">My comms in English is like... thenga 🥥</span> . If I could speak proper English, I would've been full be like  <span class="txt-loud">Sadath Baai ...</span> But no, I'm just standing there like "hehe... yes yes... nice nice."
+                </div>
+
+                <div class="story-part">
+                    First day was okayish. I actually thought we'd have to do hard labor—you know, <i>sramadhan</i> style? I have taken dress and shoes and all for that."
+                    <br><br>
+                    Then night came. 7:00 PM Assembly. We were chilling, watching the <b>Pili dance</b>  🐯. It was actually nice... untill those <span class="txt-loud">bloody guys</span> came.
+                    <br><br>
+                                        <img src="./book_images/img10.jpeg" class="collage-img img-left">
+
+                    The square-face Sir walks up and made a damn team. <span class="txt-loud">He separated our whole team 😭.</span>
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    <span class="txt-big">The Awkward Phase</span>
+                    <br>
+                    Shittt maaan! Now I'm sitting with complete strangers. North Indian group. They're talking half Hindi, half English, laughing at jokes I don't understand. I'm just sitting there like a statue, nodding like "haha... yes yes..." <span class="txt-loud">oru vaakkum manasilaakunilla</span> 😂.
+                    <br><br>
+                    <img src="./book_images/img11.jpeg" class="collage-img img-center">
+                    Inside my head: "Avasanam. I'm finished." I was feeling SO uncomfortable. Like when you're in the wrong group.
+                </div>
+
+                <div class="story-part">
+                    Then I noticed a short girl in my new team. Kerala group. who had a small mustache. Sami and Sebin talked to her,u knowwww iam a shy onee....
+                    <br><br>
+                    <span class="txt-loud">"Dude... She studied in your same school of mine! 🫨"</span>
+                    <br><br>
+                                        <img src="./book_images/img12.jpg" class="collage-img img-left">
+
+                    Wait... WHAT?? Out of nowhere? Same school? In this random camp? i was so curius 
+                    <br><br>
+                    nights down ,to next morning, 6.00 am , we should be there on Assembly, patriotic songs 🇮🇳, exercises. I was doing jumping jacks thinking "Okay this isn't so bad.personally i like to do the exercise and activity in groups, thats why iam in nss."
+                    <br><br>
+                    Then breakfast time. We were eating in the open auditorium. Morning sun was hitting the steps beautifully 🌞. I was eating slowly, looking around casually, enjoying the peaceful moment...it was uppma i think, i used to it.
+                    <br><br>
+                                        <img src="./book_images/img13.jpg" class="collage-img img-right">
+
+                    And then. <span class="txt-loud">I saw her. 👀✨</span>
+                </div>`
+            },
+
+            {
+                text: `
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <img src="./book_images/her.jpg" 
+                         style="width: 100%; height: auto; max-height: 80vh; object-fit: cover; border: 15px solid #fff; box-shadow: 0 15px 50px rgba(0,0,0,0.4); transform: rotate(-2deg);">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    She was wearing a white and violet flower-pattern salwar, with one purple mafta casually placed. I swear, the moment I saw her, my brain just stopped working. I was like… <span class="txt-loud">woooowwwww 😶💜.</span>
+                    <br><br>
+                    That day, she looked so <span class="txt-big">uniquely beautiful</span>, not in some loud way, but calm, effortless, like she didn’t even know how pretty she was. She was eating with her friends, smiling, laughing, full gossip mode.
+                    <br><br>
+                    <img src="./book_images/img14.jpg" class="collage-img img-right">
+                </div>
+                
+                <div class="story-part">
+                    And then there was me… standing a little ahead, acting like I don’t care, <span class="txt-loud">shy thing u knoowww... but ippo naaan aggnallattoo, i managed to be active, eee keynje campilokke ...😌.</span> Inside though? Total opposite. I really wanted to talk to them. Like really really.
+                    <br><br>
+                    But immediately another voice in my head said, <span class="txt-small">nono bro… she’s not in our range.</span> So I just stood there, pretending to be busy with food, life, existence. Time passed. I kept noticing her. Small things.vaayinoottam aan paranj verandda..vaazhee nokeekilla.. the way she talked, the attitude, smile. But I don’t think she noticed me at all. Or maybe she did and chose peace 😭.
+                    <br><br>
+                    <img src="./book_images/img15.jpeg" class="collage-img img-left">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    One day gone. Then another. And suddenly she became friends with almost all my friends in no time. <span class="txt-big">Like speed run friendship.</span> Her and her friends were bonding with our teammates so fast. I was also talking to people, moderately, nothing special.
+                    <br><br>
+                    <img src="./book_images/img16.jpeg" class="collage-img img-center">
+                    But till then, I still hadn’t spoken to her properly. Not even one normal conversation. At one point, my stupid brain started thinking something else.
+                </div>
+
+                <div class="story-part">
+                    <span class="txt-loud">Why does it feel like she’s avoiding only me?jaada thendiii</span>
+                    <br><br>
+                    She was talking to others, eating with them, laughing, gossiping, sitting with them like they’ve known each other forever. And me? I was always slightly outside the frame.saarallaa... Like a background character. <span class="txt-small">Present, but not included 🫥.</span>
+                    <br><br>
+                    <img src="./book_images/img17.jpeg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    There will be the cultural program every day, u knowww... <span class="txt-loud">Nagade team ayn Pattye teammaaaa...</span> full <i>moyanthaa</i> (total waste)! Only Anushree and Dhanu were doing something properly. Other than that, all were... well, you know. 😂
+                    <br><br>
+                    <img src="./book_images/img18.jpg" class="collage-img img-left">
+                    The other teams were competing like crazy, but then there’s us and the <span class="txt-loud">Bangalore Gang.</span> Did I mention them? I don’t remember, <i>khair</i> (anyway)...
+                    <br><br>
+                    <span class="txt-big">Jo, Nandhana, Shilpa, and Hemanth.</span>
+                    <br><br>
+                    Even though I am one introvert guy, I became company with them very fast. They are like tooo open! We are like jolly and funny, <span class="txt-loud">ekdum mast mood! 🕺💃</span> Dilruba is also there.
+                    <br><br>
+                    <img src="./book_images/img19.jpeg" class="collage-img img-right">
+                    We were just watching the culturals; it was fun because those Bangalore guys are, u knowww, <span class="txt-loud">fkn talented!</span> Asli talent, not like us...
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Being casual, I simply looked to the open stage. We were sitting in the corner, right side back of the gallery.
+                    <br><br>
+                    And there she was. On stage. In that <span class="txt-loud">violet and white salwar</span>, u knoowww...
+                    <br><br>
+                    <img src="./book_images/img20.jpg" class="collage-img img-center">
+                    <br>
+                    <span class="txt-loud">She is Adeeba. 😍</span>
+                    <br><br>
+                    I still remember the way she sings. That was too nice and raw. One <b>Mappila song!</b> Clear <i>shayari</i> vibes in her voice, <i>wallah</i>.
+                    <br><br>
+                    Now, <i>naaneppolum parayum onnu paadan</i> (I always ask her to sing), but she can’t. <span class="txt-loud">Jaada patti! 🐕‍🦺</span> (Show-off!). I really loved that song, u knooowww... but she doesn’t like that I am saying that. Whtvr... 🙄
+                    <br><br>
+                    <img src="./book_images/img21.jpg" class="collage-img img-right">
+                    And also, there is one girl in their team... Me and Jo have a crush on her, u knooowww... <span class="txt-loud">Kidding ok! 😂</span> Btw, she dances well.
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Next day morning, the camp coordinators took us for a morning walk through the neighbouring village. Everyone was there. Full group. I was walking front, then back, then middle. I didn’t stick with anyone consistently. Half of my brain was like, <span class="txt-small">walk properly</span>, and the other half was like, <span class="txt-big">maybe you’ll end up near her.</span>
+                    <br><br>
+                    I tried. <span class="txt-loud">Hoooo… what to say.</span>
+                    <br><br>
+                    <img src="./book_images/img22.jpeg" class="collage-img img-left">
+                    She was always busy with her friends. Talking, laughing, fully engaged. I don’t think she even saw me those days. Not even accidentally. After some time, I gave up. I slowed down and started walking alone, half walking, half running, full daydreaming mode 🌫️. My thoughts were louder than the surroundings.
+                </div>
+
+                <div class="story-part">
+                    The place itself felt strange. Not very green. More like dried fields. Sun hitting everything. The land looked tired, but people were still living there. Small houses, simple lives, kids watching us pass by.
+                    <br><br>
+                    It felt a little cursed, a little sad, but also real. And I was just there, walking through it, lost in my own head, thinking about someone who probably didn’t even know I existed.
+                    <br><br>
+                    <img src="./book_images/img23.jpeg" class="collage-img img-center">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    I was running through that side road near the factory. You know that place? One side full of dried bushes, dust, and that proper village dirt road vibe. She was standing there with her friends.
+                    <br><br>
+                    I was just passing near them, trying to look cool while running. Suddenly, I heard a voice from behind:
+                    <br><br>
+                    <span class="txt-loud">“Heyyy… neee yendha otakk nadakknnneeee?”</span>
+                    <br><br>
+                    <img src="./book_images/img24.jpg" class="collage-img img-right">
+                    I swear, <span class="txt-big">my heart stopped for a second 😳.</span>
+                    <br><br>
+                    It was her. That was the first time she directly spoke to me. Just a simple question, but inside my chest? <i>Hooooohhh.</i> My brain froze.
+                </div>
+
+                <div class="story-part">
+                    I didn't know what to say. I just smiled, nodded like "yeah yeah," and immediately <span class="txt-loud">ran away from there like an idiot 🏃‍♂️💨.</span>
+                    <br><br>
+                    <img src="./book_images/img25.jpg" class="collage-img img-left">
+                    While running, my brain was shouting at me: <i>"Hoohhh… she’s ...nice aan /thonunnu,vellye jaada lla."</i> Like, okay. She noticed me. She spoke. That itself felt big.
+                    <br><br>
+                    That day, nothing else happened. Just that one line. But for me? <span class="txt-big">......</span>
+                </div>`
+            },
+          {
+                text: `
+                <div class="story-part">
+                    Next day, trip mode on 🚌. We were split into different buses. I looked around hoping for some familiar faces, but as usual,ansar and me..rest of them,and <span class="txt-loud">she was in the other bus 🙃.</span> 
+                    <br><br>
+                    But hey, <i>khair</i> (anyway), the vibe in our bus was different level! The boys were <span class="txt-loud">full on josh 💃🕺.</span> Dancing, shouting, hitting the bus roof... pure chaos. Even I forgot everything and joined the madness. Anshida (her friend) was also there in our bus, just watching our "monkey dance" and she also being there to dance, in seat.
+                    <br><br>
+                    <img src="./book_images/img26.jpg" class="collage-img img-left">
+                    We reached the museum. It had this cool setup with tribal villages and realistic statues. I was walking with Ruba for a while, just talking random stuff.
+                    <br><br>
+                    I wasn't staring at Adeeba or anything, but u knowww... your eyes just catch familiar faces. She was walking ahead with Kodi and Ansar, laughing at something. I just looked, thought "ah, nice," and went back to checking out the statues. <span class="txt-small">Zero stress.</span>
+                    <br><br>
+                    <img src="./book_images/img27.jpg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Then came the comedy piece. I met Vignesh near a display. There was this heavy stone cannon model. This guy... <span class="txt-loud">he tried to lift it like Bahubali 💪.</span> Full serious face, veins popping out! Seeing him, my ego also woke up. I tried to lift it too... but yeah, let's not talk about that. 
+                    <br><br>
+                    <img src="./book_images/img28.jpg" class="collage-img img-left">
+                    Then, Lunch time 🍽️.
+                    <br><br>
+                     I sat down to eat, and Anshida was there. Adeeba joined too. We just started talking—not flirting, just normal "school-college" talk. And then... <span class="txt-loud">BOOM. </span>
+                    <br><br>
+                    We realized we were from the <span class="txt-big">Same Batch!</span> Same school!
+                    <br><br>
+                    I was like, <i>"Edaa, nee aa schoolil aayrunno??"</i> . And the biggest shock? Her ex-boyfriend was my friend and batchmate! 💀i dont know him much but also...
+                    <br><br>
+                    <img src="./book_images/img29.jpeg" class="collage-img img-right">
+                    We laughed so hard at that. "Ayyye??" . That awkwardness broke completely. just that feeling when you find a "homie" in a strange place. The camp suddenly felt a lot less boring.
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    We got company faster than I expected. Like, not suddenly-close-close, but that natural kind where talking doesn’t feel forced anymore. Time just started moving without me noticing. Oh wait, I forgot something in between 😅.
+                    <br><br>
+                    <span class="txt-big">Ruba… brooo.</span> I didn’t even realise till then how extrovert she actually was. She suddenly got full company with some Punjabi guys, talking, laughing, matching their energy like she’s known them forever. I was lowkey shocked. And not just that, she was also hanging out with this one drawing guy, discussing art and all. I was like, <span class="txt-small">didnt expect tht.</span>
+                    <br><br>
+                    <img src="./book_images/img30.jpg" class="collage-img img-right">
+                </div>
+
+                <div class="story-part">
+                    We talked a lot in the gallery. Standing, walking, stopping near random artworks, commenting nonsense, laughing. That gallery time felt lighter somehow. After that, we got back on the bus 🚌. And this is where things shifted again.
+                    <br><br>
+                    Anshy where there in the bus, at thtt time njn sherkil oloood mindnneee.., talking normally. She started opening up about her past and all. At one point, she even showed me her friends. In between, we discussed one person from their friend group for me, jokingly. Then came the sad news… <span class="txt-loud">all of them are settled 😭.</span>
+                    <img src="./book_images/img31.jpg" class="collage-img img-left">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Then suddenly she mentioned Adeeba. I was like… <span class="txt-loud">hoohhhh 😶blushing insidee...</span> i thougth she will be commited, auuu....u knoowwww..Immediately she started motivating me, lifting my mood, saying things like it’s okay, everything has time. I was listening quietly. And then… <span class="txt-big">......</span>
+                    <br><br>
+                    Out of nowhere she casually said Adeeba has more demands and all,ink ndalloo..... nna inne iggne pokki kondooyathendhinaaa!.. and that <span class="txt-loud">she’s 22 years old.</span> Like… 1.5 years older than everyone else.
+                    <br><br>
+                    <img src="./book_images/img32.jpg" class="collage-img img-center">
+                    Bro. My soul left my body. I went into deep dark mode instantly. Holy shit. Why did she say this now?nnaa aa pattikkk nerthe paranjoodeynnoo, we arre checking one 1 for me frm her group and she itself suggesting adeeba. My brain started calculating ages, timelines, life decisions, future regrets, everything at once 🧠💥.
+                </div>
+
+                <div class="story-part">
+                    Then somehow, yeethayalum moonji, keerivanna crush athe pole yerggi poyi, whevrr.. <span class="txt-big">“I’m 23.”</span> Ha ha ha. Yennoda kali 😌.Njn adym visoycheela oolk 22 anennn..
+                    <br><br>
+                    After that, We started laughing. Talking freely. And then… somehow… don’t even ask how… we ended up discussing <span class="txt-loud">i was like ,how to propose her,adeeba.</span>jst in funny way ok..
+                    <br><br>
+
+                    <img src="./book_images/img33.jpg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    I was like, <span class="txt-small">“Heyyy, don’t tell her okay 😭. You just casually call her to the open auditorium and I’ll confess and all,”</span> just saying it for fun. Full drama talk. Inside, It was all just jokes, laughing, teasing.i think she is also confused , inkendha brandhaana....
+                    <br><br>
+                    The bus reached faster than usual. Maybe because we were too busy talking nonstop and didn’t even notice the road 🚌. Time just slipped.
+                    <img src="./book_images/img34.jpg" class="collage-img img-right">
+                </div>
+
+                <div class="story-part">
+                    That night, she <span class="txt-loud">actually brought Adeeba to me 😳.</span> We were just joking, laughing, talking random nonsense.ithin ppo ndhina inne kanikkaan kodnnknee....WTVR.. Nothing awkward, nothing serious. Just chill vibes.ool paranjkkonnullyaaa... Days passed like that. Slowly, without realising, I started liking the camp. It didn’t feel forced anymore. It felt natural. Fun even 🙂.
+                    <br><br>
+                    <img src="./book_images/img35.jpg" class="collage-img img-left">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Day 6 came. Flag hoisting day 🇮🇳. Programs, arrangements, full event mode. Again, they assigned buses like the previous day. This time, we were going to St. Joseph University. On the way, Bangalore looked… i was soo nice u knooww, heart of the banglure,We passed a stadium, parks with <span class="txt-big">cherry blossom flowers 🌸</span>, roads that were busy but still calm.
+                    <br><br>
+                    <img src="./book_images/img36.jpg" class="collage-img img-center">
+                </div>
+
+                <div class="story-part">
+                    Finally, we reached St. Joseph University. <span class="txt-loud">Brooooo.</span> When I saw that university, the campus, the compound, everything… I genuinely felt like <span class="txt-big">thuppi yeriyan thonnum our college 😭.</span> St. Joseph was on another level. So clean. So spacious. So beautiful. Way better than ours, no comparison.
+                    <br><br>
+                    <img src="./book_images/img37.jpg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    There were already many students there from different colleges. And then I saw Adeeba. She was wearing a traditional outfit. A black and white saree, proper Kerala style. She had a light brown mafta that she wore perfectly. And honestly… <span class="txt-loud">she looked really pretty that day 😶✨.</span> Like, it suited her so well. Simple, elegant, calm.
+                    <br><br>
+                    <img src="./book_images/img38.jpg" class="collage-img img-left">
+                </div>
+
+                <div class="story-part">
+                    We walked through the grounds holding our banner 🚩. It felt like an NSS march parade. Walking together, crowd watching, people clicking photos. That moment felt nice, like we were part of something bigger.
+                    <br><br>
+                    After that, we went for food 🍽️. And then straight to the theatre. Big hall, lights, stage, full function vibe. I sat there, looking around, thinking how this camp, which I hated from day one, <span class="txt-small">somehow turned into something I didn’t want to end so soon.</span>
+                    <img src="./book_images/img39.jpg" class="collage-img img-center">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    I somehow got a seat near her. <span class="txt-loud">Hhohhhh 😳.</span> That itself felt like a small win. We talked a little. ndhhh oru kaaryummm,iilllla...korch avde irnnn koookki..sitting near her felt nice... nice.
+                    <br><br>
+                    After some time, Dilruba and Anushree came and sat near me. That’s when I felt fully comfortable. Same josh, same humour, same wavelength 😄.
+                    <br><br>
+                    <img src="./book_images/img40.jpg" class="collage-img img-right">
+                </div>
+
+                <div class="story-part">
+                    Then suddenly… <span class="txt-big">bloody Anshy decided to shift seats 😭.</span> She swapped places with Adeeba, came and sat between us. What to do. bllooody pattii.... paranjtt kaaryallallooo, we just enjoyed the show, thts the time i actually enjoyed the camp at alll, one of the incident..
+                    <br><br>
+                    That night, something felt off. I felt slightly upset thinking that all this was going to end. From the beginning, I didn’t even like the camp. I complained about everything. But now, suddenly, the thought of it ending hit me a little. <span class="txt-small">Soft hit. Unexpected hit.</span>...onnualla iniipoo classil poi irkkandeeee...
+                    <br><br>
+                    <img src="./book_images/img41.jpg" class="collage-img img-left">
+                    Next day was the send-off party 🎉. Dance, programs, performances, noise, laughter. Everyone was already missing each other. We packed our bags 🎒. At that moment, I genuinely wished I could live it once more. This time without complaining. Just enjoying it properly.
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    The camp van dropped us at the main road. Around 14 of us, I think. From there, we took the metro 🚇. I think that was my first time in a metro in India. Brooo, it was so clean. Like really clean.
+                    <br><br>
+                    We got down somewhere and started walking. Full fun mood.koreee yeggandelloo nadannu. we safe our bags in railway locker, athum kond naddakkal task hee... ,foundains, roads on road, cherye chaaya kada yellom keeri, ive looked for chapel for my mother ,adeeba yelloom select aakndaynnu,vaagyoo???? ormalla..Then we walked to Orion Mall in Bangalore.ink paalace yellom kananm ndayni , but u know , this guys are waiting for the train, And bro… <span class="txt-loud">HOLY SHIT.</span> That mall was HUGE 😳. Nothing compared to Mangalore malls. Massive space.
+                    <img src="./book_images/img42.jpg" class="collage-img img-center">
+                </div>
+
+                <div class="story-part">
+                    Finally, we re just roaming,me, jo, nandhana, anshy and some of guyss, and all...adeeba and ansar and all have gone their way ,bithesss...we are not in there for any shopping ,for just roaminggg... naggl food keychu, walked, takes photos... but adeeba was not there, oolk ole ansarum maalum oke ndalloo, nna onnn parayaa, they where chilling in shops and all, we some guys are searching entire mall for them <span class="txt-big">yendhaa parayaaaa...</span>tht was nonsense ,isnt it?
+                    <br><br>
+                     Including Adeeba,ansar. playing inside Decathlon 🏸. <span class="txt-loud">Bloody idiots.</span> Those guys didn’t even think to call us. we were just walking like really exhausted, kerala boys are like they wanna to go noowwww,oolk naale exm aaathree, other guys are chilling...
+                    <img src="./book_images/img43.jpg" class="collage-img img-left">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    It was already time for their train. We tried getting an auto 🚖. One guy asked ₹500 for 2 kilometres. No way. We walked. After some time, we finally got another auto and reached the railway station. They had booked sleeper class. That moment felt really dull. Heavy silence.
+                    <br><br>
+                    And Adeeba didn’t even properly say bye to me. u knoowww... i dont wanna to say any thing more about tht...
+                    <br>
+                    <span class="txt-loud">The bitch 😒.</span>
+                    <br><br>
+                    <img src="./book_images/img44.jpg" class="collage-img img-right">
+                    We said bye to them, took our bags from the locker, and sat in the waiting area. Complete blackout mood. No one spoke. Just sitting there, staring, thinking. We were really disappointed about how fast the camp went. In that moment, it actually hurt.
+                </div>
+
+                <div class="story-part">
+                    Train arrived 🚆.board the train, we went to sleep, we where really exhausted... Around 2:30 AM, some unknown guy came and sat near us. I don’t know where that bastard came from, but he did something not acceptable. cant expalain tht....the other passengers also supoorted us.. We surrounded him and literally sat like guards the entire night 😐.
+                    <br><br>
+                    <img src="./book_images/img45.jpg" class="collage-img img-left">
+                    We planned to hand him over to the police, but unfortunately,near to morning that guy jumped off the train at one Mangalore junction and escaped. Night passed like that. No sleep. <span class="txt-big">i was really disapointed, and confusing about that insident.</span>
+                    <br><br>
+                    And just like that… camp done..
+                    <br>
+                    <span class="txt-small">__nic..Not the way I imagined. But definitely not forgettable.</span>
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    We reached Mangalore Central station in the morning. Grey fog everywhere 🌫️. That kind of fog where everything feels slow and heavy. We looked around for the platform police and then for the police office.
+                    <br><br>
+                    <img src="./book_images/img46.jpg" class="collage-img img-right">
+                    There’s this small police station at one corner of a four-road junction, with a mango tree leaning over it, <span class="txt-small">chaanju nikknu pole 🌳.</span> That image is still clear in my head. We complained about the incident, did whatever formalities,they have asked for his photo and all, we didnt have anything.. and then left. And just like that, it was over.
+                </div>
+
+                <div class="story-part">
+                    After that, there was this empty feeling. Like… we’ve done everything. Nothing left to do. I don’t know when exactly, but I was checking on Anshy casually. And at the same time, I simply messaged Adeeba apk too. Just like that. No plan.
+                    <br><br>
+                    And bro… from there, <span class="txt-loud">kunjaamaa...it went wild 😅.</span> We became reel-holics. Sending too many reels. Day, night, anytime. This was the first time in my life I was talking this much with someone.
+                    <img src="./book_images/img47.jpg" class="collage-img img-left">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    Talking to her felt very free. No rules. No pressure. No lag. Messages just flowed. Gradually, nights stretched. <span class="txt-big">1 AM… 2 AM… sometimes even more 🌙.</span> I don’t even remember half the nonsense we talked.
+                    <br><br>
+                    She talked about marriage dresses, random Instagram guys,i think, ool oole kalyanatina kurchaa innood parayneeee... like normal no work dress and bmw and aalll.. Captain America vs Iron Man fights. Her Korean serial guys. Anime stuff. <span class="txt-small">I don’t know how she had so much time to cover everything.</span>
+                    <img src="./book_images/img48.jpg" class="collage-img img-center">
+                </div>
+
+                <div class="story-part">
+                    She talked about her imaginary, impossible dream guy. I talked about mine too. Her mood swings. I genuinely loved listening to her then. Those days felt warm. annelloo she will sing songsss.. the songs 🎶.
+                    <br><br>
+                    Now… I don’t know. Somewhere, priorities changed.u knoowww ipppo puthye alkaar ndavuello athaavummm.. And then comes the funniest, stupidest part.and many faces of her.. <span class="txt-loud">She would break up with me because I broke up with her.</span> WTF maaaannn 😭.
+                    <img src="./book_images/img49.jpg" class="collage-img img-right">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    I’d have to go back after 2 or 3 days, talk, explain, fix things. Hooo my goooddd. Once, I decided firmly. I was like, I will not go back until she apologises. Next second, <span class="txt-big">my Instagram feed itself turned against me 😭.</span> Reels, quotes, posts, everything attacking me.
+                    <br><br>
+                    And she would use my breakup against me.not that breakup, clash breaks u knoooww... I still don’t know how that logic works. <span class="txt-loud">Bloody witch 🧙‍♀️.</span>
+                    <br><br>
+                    talks says many things..  about Adharsh. A typical normal senior guy. She kept comparing me with him. Like bro… she’s 1.5 years older than me, and she’s comparing me with that senior dad of hers. innt ippo oon ooodeee.....oole crush aynnathreee,paavmmm. So I also started telling about Nafia and Cthu.tooo <span class="txt-small">Any way, they’re better than this kunjaama.</span>
+                </div>
+
+                <div class="story-part">
+                    Somewhere in between, she aggne open aval koranju.... I was the one who encouraged her the most. But priorities maaruelloo. Full focus on her Adharsh, <span class="txt-small">lil donkey 🐴.</span> At one point, she also stopped spamming reels. Priority shift. Who maintains, who goes. Now we’re basically like enemies.
+                    <br><br>
+                    Then days after, i dont know why , she stops about her adhimon, oonk vere set aayaaleee.... <span class="txt-loud">Adharsh got committed.</span> Hahahahahahaha 😭.
+                    <img src="./book_images/img50.jpg" class="collage-img img-center">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    But still… we remained good friends. We talk all day. She talks about her friends, home, college tales. I still love listening to those. Days passed. Months passed.
+                    <br><br>
+                    Now she’s joined tuition centre again. She’s actually good at studying 📚. Recently, ipppo she was like:
+                    <br><br>
+                    <span class="txt-big">“Iam just a no one. Just entertainment.”</span>
+                    <br><br>
+                    You knowwwww 😶.
+                    <img src="./book_images/img51.jpg" class="collage-img img-right">
+                </div>
+
+                <div class="story-part">
+                    Even if you stick around for so long, people will still label you however they want. Even now, if I ask her to sing, she says throat problem. It started four months ago. What to do.onnum parayanda innnii....
+                    <br><br>
+                    Hmmmm.
+                    <br><br>
+                    <span class="txt-loud">Just friend.</span>
+                    <br>
+                    <span class="txt-small">Not best friend. Not anything more.</span>
+                    <br><br>
+                    You knooowwwww.
+                    <img src="./book_images/img52.jpg" class="collage-img img-center">
+                </div>`
+            },
+            {
+                text: `
+                <div class="story-part">
+                    It’s been almost one year, <span class="txt-loud">innattum oolk nammle pattilla</span>  But <i>yeetho kanda seniorine</i> is fine for her! 😤
+                    <br><br>
+                    <i>Nammakk veshmonnum lla nnalum ,sheryallaalo...u knoowwww</i>
+                    <br><br>
+                    <img src="./book_images/img53.jpeg" class="collage-img img-right">
+                    She has her own people now. She has <span class="txt-loud">${friendList}</span>...okke aathrrre ole best friends<span class="txt-loud">😒</span>
+                </div>
+
+                <div class="story-part">
+                    If I send a message, she will just 'Like' it and vanish. <i>Oru reply polum tharoola.</i>
+                    <br><br>
+                    <span class="">Baakiyullavarodulla dheshyam motham nammalod theerkum</span> 
+                    <br><br>
+                    <img src="./book_images/img54.jpg" class="collage-img img-left">
+                    <i>Nadakkatte, nadakkatte... Allenkilum angane aanallo.</i>
+                    <br><br>
+                    <span class="txt-big">Get lost... 🙄💔</span>
+                    <br>
+                    <span class="txt-small">any way , ith last ink brandh pidch kittye paatt kuthi ketyethaan..adjust with it okkkeeyy...</span>
+                    <br><br>
+                    <br><br>
+                    <br><br>
+                    <br><br>
+                    <br><br>
+                    <br><br>
+                    <span class="txt-big">Hmmmm, pokko pokko keynjjjj... 🙄</span>
+                </div>`
+            }
+        ];
+
+        let currentDiaryPage = 0;
+
+        function renderDiaryPage(index) {
+            const data = diaryContent[index];
+            pageIndicator.innerText = `Page ${index + 1} / ${diaryContent.length}`;
+            
+            // SFX
+            pageSfx.currentTime = 0;
+            pageSfx.play();
+
+            let html = `<div class="fade-content">`;
+            // Note: Removed Title/Img as requested for collage style
+            if(data.text) html += `<div id="diary-text">${data.text}</div>`;
+            html += `</div>`;
+            
+            diaryBody.innerHTML = html;
+            diaryBody.scrollTop = 0; // SCROLL TO TOP FIX
+        }
+
+        openDiaryBtn.addEventListener('click', () => {
+            bookEntryModal.style.display = 'none';
+            diaryOverlay.style.display = 'flex';
+            currentDiaryPage = 0;
+            hasOpenedDiary = true; 
+            renderDiaryPage(0);
+            isDiaryOpen = true;
+            unlockMouseForPopup();
+        });
+
+        closeDiaryBtn.addEventListener('click', () => {
+            diaryOverlay.style.display = 'none';
+            isDiaryOpen = false;
+            lockMouseAfterPopup();
+            // Try to advance timeline if waiting on book
+            if (currentTimelineStep === 3 && hasClickedBook && hasOpenedDiary) {
+                scheduleNextEvent(2000); 
+            }
+        });
+
+        nextPageZone.addEventListener('click', () => {
+            if(currentDiaryPage < diaryContent.length - 1) {
+                currentDiaryPage++;
+                renderDiaryPage(currentDiaryPage);
+            }
+        });
+
+        prevPageZone.addEventListener('click', () => {
+            if(currentDiaryPage > 0) {
+                currentDiaryPage--;
+                renderDiaryPage(currentDiaryPage);
+            }
+        });
+
+        // --- TYPEWRITER INTERACTION LOGIC ---
+        
+        // Open from Poster Button (UPDATED LOGIC HERE)
+        openTypewriterBtn.addEventListener('click', () => {
+            // 1. Mark as used IMMEDIATELY when entering the typing area
+            if (!hasClickedTypewriter) {
+                hasClickedTypewriter = true;
+                // Check if this was the last item needed to open the door
+                checkAllObjectives(); 
+            }
+
+            // 2. Hide poster & Show actual overlay
+            closePoster('typewriter-tutorial'); 
+            typewriterOverlay.style.display = 'flex'; 
+            
+            isDiaryOpen = true; 
+            unlockMouseForPopup();
+            typewriterInput.value = "";
+            typewriterInput.focus();
+        });
+
+        // Stamping animation (KEPT SAME)
+        typewriterInput.addEventListener('keydown', () => {
+            // Paper Shake
+            const sheet = document.querySelector('.paper-sheet');
+            sheet.classList.remove('shake-anim');
+            void sheet.offsetWidth; 
+            sheet.classList.add('shake-anim');
+            
+            // Hammer Strike Animation
+            typewriterHammer.classList.remove('hammer-strike');
+            void typewriterHammer.offsetWidth; 
+            typewriterHammer.classList.add('hammer-strike');
+            
+            setTimeout(() => {
+                typewriterHammer.classList.remove('hammer-strike');
+            }, 80);
+        });
+
+        // CLICK OUTSIDE TO CLOSE TYPEWRITER
+        typewriterOverlay.addEventListener('click', (e) => {
+            if (e.target === typewriterOverlay) {
+                typewriterOverlay.style.display = 'none';
+                isDiaryOpen = false;
+                lockMouseAfterPopup();
+            }
+        });
+
+        sendLetterBtn.addEventListener('click', () => {
+            const letterText = typewriterInput.value.trim();
+            if(letterText !== "") {
+                // 1. CLOSE OVERLAY IMMEDIATELY
+                typewriterOverlay.style.display = 'none';
+                isDiaryOpen = false;
+                lockMouseAfterPopup();
+                hasClickedTypewriter = true; 
+                
+                // 2. SHOW "SENDING" SPEECH
+                showSpeech("Sending to the clouds... ☁️📨"); 
+
+                // 3. ADVANCE TIMELINE IF WAITING
+                if(currentTimelineStep === 4) scheduleNextEvent(2000); 
+
+                // 4. SEND EMAIL IN BACKGROUND
+                const params = {
+                    message: letterText,
+                    time: new Date().toLocaleString(),
+                    name: "Kunjaama" 
+                };
+
+                emailjs.send("service_xvma48p", "template_2h62cyq", params)
+                .then(function() {
+                    // Success Callback (Late)
+                    showSpeech("Letter delivered! 📨");
+                }, function(error) {
+                    // Error Callback (Late)
+                    console.log('FAILED...', error);
+                    showSpeech("The owl got lost... 😿");
+                });
+
+            } else {
+                alert("You can't send an empty letter! 😺");
+            }
+        });
+
+        // --- FRAME VIEWER LOGIC ---
+        function showFrame(imageName) {
+            const path = `frame_images/${imageName}.jpg`;
+            frameImg.src = path;
+            downloadFrameBtn.href = path;
+            
+            frameOverlay.style.display = 'flex';
+            isDiaryOpen = true; 
+            unlockMouseForPopup();
+        }
+
+        closeFrameBtn.addEventListener('click', () => {
+            frameOverlay.style.display = 'none';
+            isDiaryOpen = false;
+            lockMouseAfterPopup();
+        });
+
+        // --- MOUSE HELPERS ---
+        function unlockMouseForPopup() {
+            isPopupOpen = true;
+            if (document.pointerLockElement) { document.exitPointerLock(); }
+        }
+
+        function lockMouseAfterPopup() {
+            isPopupOpen = false;
+            if (!('ontouchstart' in window)) { document.body.requestPointerLock(); }
+        }
+
+        // --- QUICK CHAT INTERFACE LOGIC ---
+        catTriggerBtn.addEventListener('click', () => {
+            quickChatOverlay.style.display = 'flex';
+            isDiaryOpen = true; // Pause game
+            unlockMouseForPopup();
+            quickInput.focus();
+        });
+
+        // Close on background click
+        quickChatOverlay.addEventListener('click', (e) => {
+            if(e.target === quickChatOverlay) {
+                quickChatOverlay.style.display = 'none';
+                isDiaryOpen = false;
+                lockMouseAfterPopup();
+            }
+        });
+
+        // --- GROQ AI CHAT FUNCTIONALITY ---
+        async function fetchGroqChat(userMessage) {
+            if (!GROQ_API_KEY) {
+                return "Meow? (Please add your API Key in the code to chat!) 😿";
+            }
+
+            const systemPrompt = `You are Babblu, the real black cat guardian of this magnificent, real castle. You serve 'The Creator'. You are talking to 'Kunjaama' (also called Kunju, Ms. PK, Jaanu, Adeeba, or Panagatuthodiyil). She is the Creator's best friend. Never say 'friend' or 'buddy'. Call her by her specific names. Never say this is a virtual place; it is real. Be cute, witty, and protective. Do NOT use asterisks (*) for actions. Use cat emojis.`;
+
+            try {
+                // Construct message history for context
+                const messages = [
+                    { role: "system", content: systemPrompt },
+                    ...chatContext,
+                    { role: "user", content: userMessage }
+                ];
+
+                const response = await fetch(GROQ_ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${GROQ_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: GROQ_MODEL,
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: 60
+                    })
+                });
+                const data = await response.json();
+                let cleanReply = data.choices[0].message.content;
+                
+                // FORCE REMOVE ASTERISKS AND TRIM
+                cleanReply = cleanReply.replace(/\*.*?\*/g, "").trim(); 
+
+                // Update Memory
+                chatContext.push({ role: "user", content: userMessage });
+                chatContext.push({ role: "assistant", content: cleanReply });
+                // Keep only last 20 messages
+                if(chatContext.length > MAX_HISTORY) chatContext = chatContext.slice(-MAX_HISTORY);
+
+                return cleanReply;
+
+            } catch (error) {
+                console.error("Groq Error:", error);
+                return "The spirits are quiet today... try again later! 😿";
+            }
+        }
+
+        quickSendBtn.addEventListener('click', async () => {
+            const text = quickInput.value.trim();
+            if(!text) return;
+
+            // 1. Close Overlay Immediately
+            quickChatOverlay.style.display = 'none';
+            isDiaryOpen = false;
+            lockMouseAfterPopup();
+            
+            // 2. Show "Hhhaaa.." in Bubble
+            showSpeech("Hhhaaa.. 🐾");
+            
+            // 3. Fetch Response
+            const aiResponse = await fetchGroqChat(text);
+            
+            // 4. Update Bubble
+            showSpeech(aiResponse);
+            
+            // Clear input for next time
+            quickInput.value = "";
+        });
+
+        // --- TRIGGER STATIC CHAT BUBBLES ---
+        function triggerRandomCatTalk(isTimelineEvent = false) {
+            const text = randomCatTalks[Math.floor(Math.random() * randomCatTalks.length)];
+            showSpeech(text, isTimelineEvent);
+        }
+
+        // --- TIMELINE SEQUENCER (UPDATED: Smart Skipping & Random Gaps) ---
+        
+        function scheduleNextEvent(customDelay) {
+            if (timelineTimer) clearTimeout(timelineTimer);
+            
+            // Randomize the gap for natural silence (Between 15s and 30s) unless a specific delay is given
+            const randomGap = Math.floor(Math.random() * 15000) + 15000; 
+            const waitTime = customDelay || randomGap; 
+            
+            timelineTimer = setTimeout(() => {
+                triggerTimelineEvent(currentTimelineStep);
+            }, waitTime);
+        }
+
+        function triggerTimelineEvent(step) {
+            if (!isGameReady) return;
+
+            switch(step) {
+                case 0: // Controls (Wait 2s at start)
+                    setTimeout(() => { showPoster('controls-tutorial', true); }, 2000);
+                    // Next step happens when Controls closes
+                    break;
+                    
+                case 1: // Chat 1
+                    showSpeech("Wooowww! Did you really look this great back in the day? 😍", true);
+                    break;
+                    
+                case 2: // FRAMES / WALL ART (Interlude)
+                    if (hasClickedFrame) {
+                        // SKIP if already clicked
+                        currentTimelineStep = 3;
+                        triggerTimelineEvent(3); 
+                    } else {
+                        showPoster('frame-tutorial', true);
+                    }
+                    break;
+
+                case 3: // Chat 2 (Random Gap)
+                    triggerRandomCatTalk(true);
+                    break;
+
+                case 4: // RADIO CHECK LOOP (Smart Skip)
+                    if (hasClickedRadio) {
+                        // SKIP TUTORIAL -> Go straight to Step 5
+                        console.log("Skipping Radio Tutorial (Already Clicked)");
+                        currentTimelineStep = 5; 
+                        triggerTimelineEvent(5); 
+                    } else {
+                        // Show Tutorial only if NOT clicked
+                        if (!hasShownRadioPoster) {
+                            showPoster('radio-tutorial', true);
+                            hasShownRadioPoster = true;
+                        } else {
+                            triggerRandomCatTalk(true); // Chat while waiting
+                            scheduleNextEvent(); // Random loop
+                        }
+                    }
+                    break;
+                    
+                case 5: // Chat 3 (Random Gap)
+                    triggerRandomCatTalk(true);
+                    break;
+
+                case 6: // BOOK CHECK LOOP (Smart Skip)
+                    if (hasClickedBook && hasOpenedDiary) {
+                        // SKIP TUTORIAL
+                        console.log("Skipping Book Tutorial (Already Clicked)");
+                        currentTimelineStep = 7;
+                        triggerTimelineEvent(7);
+                    } else {
+                        if (!hasShownBookPoster) {
+                            showPoster('book-tutorial', true);
+                            hasShownBookPoster = true;
+                        } else {
+                            triggerRandomCatTalk(true);
+                            scheduleNextEvent();
+                        }
+                    }
+                    break;
+                    
+                case 7: // Chat 4 (Random Gap)
+                    triggerRandomCatTalk(true);
+                    break;
+
+                case 8: // TYPEWRITER CHECK LOOP (Smart Skip)
+                    if (hasClickedTypewriter) {
+                        // SKIP TUTORIAL
+                        console.log("Skipping Typewriter Tutorial (Already Clicked)");
+                        currentTimelineStep = 9;
+                        triggerTimelineEvent(9);
+                    } else {
+                        if (!hasShownTypewriterPoster) {
+                            showPoster('typewriter-tutorial', true);
+                            hasShownTypewriterPoster = true;
+                        } else {
+                            triggerRandomCatTalk(true);
+                            scheduleNextEvent();
+                        }
+                    }
+                    break;
+                    
+                case 9: // Chat 5 (Random Gap)
+                    triggerRandomCatTalk(true);
+                    break;
+
+                case 10: // DOOR FINAL LOOP
+                    showPoster('door-tutorial', true);
+                    currentTimelineStep = 11; 
+                    break;
+                    
+                case 11: // Infinite Chat Loop (Long Random Gaps)
+                    triggerRandomCatTalk(true);
+                    scheduleNextEvent(); // Random 15-30s gap
+                    break;
+            }
+        }
+
+        // --- DISPLAY HELPERS ---
+        function showPoster(elementId, isTimelineEvent = false) {
+            const el = document.getElementById(elementId);
+            if(el) {
+                el.style.display = 'block';
+                el.dataset.isTimeline = isTimelineEvent; 
+                unlockMouseForPopup();
+                
+                // Auto-close after 20s (except Door)
+                if(elementId !== 'door-tutorial') {
+                    setTimeout(() => {
+                        if(el.style.display === 'block') {
+                            closePoster(elementId);
+                        }
+                    }, 20000);
+                }
+            }
+        }
+
+        function closePoster(elementId) {
+            const el = document.getElementById(elementId);
+            el.style.display = 'none';
+            lockMouseAfterPopup();
+            
+            // TIMELINE CONTINUATION LOGIC
+            if (el.dataset.isTimeline === "true") {
+                el.dataset.isTimeline = "false";
+                
+                if (currentTimelineStep === 0) { // Controls Closed
+                    currentTimelineStep = 1;
+                    scheduleNextEvent(7000);
+                }
+                else if (currentTimelineStep === 2) { // Frame Poster Closed
+                    currentTimelineStep = 3;
+                    scheduleNextEvent(7000);
+                }
+                else {
+                    scheduleNextEvent(); // Loop standard delay
+                }
+            }
+        }
+
+        function showSpeech(text, isTimelineEvent = false) {
+            speechBubble.innerHTML = text;
+            speechBubble.style.display = 'block';
+            speechBubble.dataset.isTimeline = isTimelineEvent;
+            
+            setTimeout(() => {
+                if (speechBubble.style.display === 'block') {
+                    closeSpeech();
+                }
+            }, 15000); // 15 Seconds Duration
+        }
+
+        function closeSpeech() {
+            speechBubble.style.display = 'none';
+            if (speechBubble.dataset.isTimeline === "true") {
+                speechBubble.dataset.isTimeline = "false";
+                // If waiting for action, don't advance step, just loop
+                // If pure chat step, advance
+                if([1,3,5,7,9,11].includes(currentTimelineStep)) {
+                     currentTimelineStep++;
+                     scheduleNextEvent(7000);
+                } else {
+                     scheduleNextEvent(7000); 
+                }
+            }
+        }
+        
+        speechBubble.addEventListener('click', closeSpeech);
+
+        // Close Handlers (Timeline Posters - Minimal)
+        closeControlsBtn.addEventListener('click', () => closePoster('controls-tutorial'));
+        closeRadioBtn.addEventListener('click', () => closePoster('radio-tutorial'));
+        closeBookBtn.addEventListener('click', () => closePoster('book-tutorial'));
+        // closeTypewriterBtn removed as openTypewriterBtn handles flow
+        closeFrameTutorialBtn.addEventListener('click', () => closePoster('frame-tutorial'));
+        closeDoorTutorialBtn.addEventListener('click', () => closePoster('door-tutorial'));
+        
+        // Manual Action Close Handlers
+        closeBookModalBtn.addEventListener('click', () => {
+            bookEntryModal.style.display = 'none';
+            lockMouseAfterPopup();
+        });
+        
+        // Door Exit Modal Handlers
+        stayBtn.addEventListener('click', () => {
+            doorExitModal.style.display = 'none';
+            lockMouseAfterPopup();
+        });
+        
+       // --- FINAL EXIT LOGIC ---
+        
+        const mandhiScreen = document.getElementById('final-mandhi-screen');
+        const trollScreen = document.getElementById('final-troll-screen');
+        const sorryBtn = document.getElementById('sorry-btn');
+
+        leaveBtn.addEventListener('click', () => {
+            // 1. Close the popup
+            doorExitModal.style.display = 'none';
+            
+            // 2. Fade to Black (Overlay)
+            blackOverlay.style.opacity = '1';
+            blackOverlay.style.pointerEvents = 'auto'; 
+
+            // 3. Fade Out Audio
+            fadeAudio(bgAudio, 0, 2000);
+            fadeAudio(radioAudio, 0, 2000);
+
+            // 4. Wait 2.5 seconds (for fade) then show MANDHI REQUEST
+            setTimeout(() => {
+                mandhiScreen.style.display = 'flex';
+            }, 2500);
+        });
+
+        // --- SORRY BUTTON LOGIC (THE TROLL) ---
+        sorryBtn.addEventListener('click', () => {
+            // Hide Mandhi Screen
+            mandhiScreen.style.display = 'none';
+            
+            // Show Troll Screen
+            trollScreen.style.display = 'flex';
+        });
+
+        // Help Modal
+        const helpIcon = helpBtn.querySelector('i');
+        helpBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (helpModal.style.display === 'block') {
+                    helpModal.style.display = 'none';
+                    lockMouseAfterPopup();
+                } else {
+                    helpModal.style.display = 'block';
+                    unlockMouseForPopup();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                helpIcon.classList.remove('fa-question');
+                helpIcon.classList.add('fa-expand');
+            } else {
+                helpIcon.classList.remove('fa-expand');
+                helpIcon.classList.add('fa-question');
+            }
+        });
+
+        closeHelpBtn.addEventListener('click', () => {
+            helpModal.style.display = 'none';
+            lockMouseAfterPopup();
+        });
+
+        // --- AUDIO SYSTEM ---
+        function fadeAudio(element, target, duration = 1000) {
+            if (element.fadeInterval) clearInterval(element.fadeInterval);
+            if (target > 0 && element.paused) element.play();
+
+            const interval = 50;
+            const steps = duration / interval;
+            const startVolume = element.volume;
+            const diff = target - startVolume;
+            const stepValue = diff / steps;
+
+            element.fadeInterval = setInterval(() => {
+                let newVol = element.volume + stepValue;
+                if (stepValue > 0 && newVol >= target) newVol = target;
+                if (stepValue < 0 && newVol <= target) newVol = target;
+                if (newVol > 1) newVol = 1;
+                if (newVol < 0) newVol = 0;
+
+                element.volume = newVol;
+
+                if (newVol === target) {
+                    clearInterval(element.fadeInterval);
+                    if (target === 0) element.pause();
+                }
+            }, interval);
+        }
+
+        // --- RADIO LOGIC ---
+        function toggleRadio() {
+            radioTrackIndex++;
+
+            if (radioTrackIndex < radioPlaylist.length) {
+                fadeAudio(bgAudio, 0); 
+                
+                radioAudio.src = radioPlaylist[radioTrackIndex];
+                radioAudio.volume = 0; 
+                radioAudio.play();
+                fadeAudio(radioAudio, 0.6); 
+                
+                isRadioPlaying = true;
+                
+                if(!hasClickedRadio) {
+                    hasClickedRadio = true; 
+                    showSpeech("Wooowww! What a music! 🎵<br>(You can change the track by clicking again!)");
+                    // Update Timeline Immediately
+                    if(currentTimelineStep === 4) {
+                        scheduleNextEvent(1000); 
+                    }
+                } 
+
+            } else {
+                fadeAudio(radioAudio, 0);
+                
+                bgAudio.play();
+                fadeAudio(bgAudio, TARGET_VOLUME);
+                
+                radioTrackIndex = -1; 
+                isRadioPlaying = false;
+            }
+        }
+
+        radioAudio.addEventListener('ended', () => {
+            if(isRadioPlaying) {
+                toggleRadio(); 
+            }
+        });
+
+        // --- BG MUSIC LOGIC ---
+        musicBtn.addEventListener('click', () => {
+            if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; changeBgTrack(); } 
+            else { clickTimer = setTimeout(() => { clickTimer = null; toggleBgPlayPause(); }, 250); }
+        });
+
+        function toggleBgPlayPause() {
+            if(isRadioPlaying) return; 
+            if (bgAudio.paused) { bgAudio.play(); musicLottie.play(); } 
+            else { bgAudio.pause(); musicLottie.pause(); }
+        }
+
+        function changeBgTrack() {
+            if(isRadioPlaying) return;
+            bgTrackIndex = (bgTrackIndex + 1) % bgPlaylist.length;
+            bgAudio.src = bgPlaylist[bgTrackIndex];
+            bgAudio.play();
+            musicLottie.play();
+        }
+
+        bgAudio.addEventListener('ended', () => {
+            changeBgTrack();
+        });
+
+        musicLottie.addEventListener('ready', () => { musicLottie.stop(); });
+
+        // --- START GAME LOGIC ---
+        // --- START GAME LOGIC ---
+        startBtn.addEventListener('click', () => {
+            
+            // 1. SET VOLUME DIRECTLY (0.3 = 30% volume)
+            // If 0.3 is still too loud, try 0.1
+            bgAudio.volume = 0.3; 
+            bgAudio.play();
+            
+            musicLottie.play();
+
+            // SHOW CAT BUTTON ON START
+            document.getElementById('cat-trigger-btn').classList.add('visible');
+            document.getElementById('cat-trigger-btn').style.display = 'flex';
+
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch((err) => { console.log(err); });
+            }
+
+            startScreen.style.opacity = '0'; 
+            setTimeout(() => {
+                startScreen.style.display = 'none';
+                if (!('ontouchstart' in window)) { document.body.requestPointerLock(); }
+                
+                // --- KICKOFF TIMELINE ---
+                if(isGameReady) {
+                    triggerTimelineEvent(0); 
+                }
+
+            }, 2000);
+        });
+
+        // --- HELPER: INVISIBLE HITBOX ---
+        function createHitbox(name, x, y, z, width, height, depth) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0xff0000, 
+                visible: false, 
+                wireframe: true 
+            }); 
+            const hitbox = new THREE.Mesh(geometry, material);
+            hitbox.position.set(x, y, z);
+            hitbox.name = name; 
+            scene.add(hitbox);
+            interactableObjects.push(hitbox);
+        }
+
+        // --- INTERACTION LOGIC ---
+        const raycaster = new THREE.Raycaster();
+        const interactableObjects = []; 
+        const popup = document.getElementById('interaction-popup');
+        let popupTimer = null;
+
+        function showPopup(text) {
+            popup.innerText = text;
+            popup.style.display = 'block';
+            clearTimeout(popupTimer);
+            popupTimer = setTimeout(() => { popup.style.display = 'none'; }, 2000);
+        }
+
+        function handleObjectClick(object) {
+            const name = object.name.toLowerCase();
+
+            // FRAME IMAGES CHECK
+            if (name.startsWith("im")) {
+                hasClickedFrame = true; 
+                showFrame(name);
+                return; 
+            }
+
+            // RADIO
+            if (name.includes("radio")) {
+                toggleRadio();
+            }
+
+            // BOOK (Manual Click Action)
+            if (name.includes("book")) {
+                bookEntryModal.style.display = 'block';
+                unlockMouseForPopup();
+            }
+
+            // TYPEWRITER (Manual Click Action)
+            if (name.includes("typewriter")) {
+                // Show tutorial poster first as requested
+                showPoster('typewriter-tutorial', false);
+            }
+
+            // DOOR (Manual Click Action - UPDATED)
+            if (name.includes("door_hitbox") || name.includes("11.003")) {
+                // Check if all 3 items are used (Radio, Book/Diary, Typewriter)
+                if (hasClickedRadio && hasOpenedDiary && hasClickedTypewriter) {
+                    // Open the Leave/Stay Confirmation
+                    doorExitModal.style.display = 'block';
+                    unlockMouseForPopup();
+                } else {
+                    // If not finished, give a hint
+                    showSpeech("There's still more to see... 🏰<br>(Check the Radio, Book, and Typewriter!)");
+                }
+            }
+        }
+
+        function checkDesktopInteraction(isClick) {
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const intersects = raycaster.intersectObjects(interactableObjects);
+            if (intersects.length > 0 && intersects[0].distance < 4) {
+                if (isClick) { handleObjectClick(intersects[0].object); } 
+                else { showPopup(intersects[0].object.name); }
+            }
+        }
+
+        function checkMobileInteraction(touchX, touchY) {
+            const mouse = new THREE.Vector2();
+            mouse.x = (touchX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touchY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactableObjects);
+            if (intersects.length > 0 && intersects[0].distance < 6) {
+                handleObjectClick(intersects[0].object); 
+                return true; 
+            }
+            return false;
+        }
+
+        document.addEventListener('mousedown', () => { 
+            if (isGameReady && startScreen.style.opacity === '0' && !isPopupOpen) {
+                if (document.pointerLockElement !== document.body) { document.body.requestPointerLock(); } 
+                else { checkDesktopInteraction(true); } 
+            }
+        });
+
+        document.body.addEventListener('mousemove', (event) => {
+            if (document.pointerLockElement === document.body && !isPopupOpen) {
+                camera.rotation.y -= event.movementX / 500;
+                camera.rotation.x -= event.movementY / 500;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+            }
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            if (!isGameReady || startScreen.style.opacity !== '0' || isPopupOpen) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (checkMobileInteraction(touch.clientX, touch.clientY)) continue; 
+                const halfWidth = window.innerWidth / 2;
+                if (touch.clientX > halfWidth) {
+                    const currentTime = new Date().getTime();
+                    if (currentTime - lastTapTime < 300 && playerOnFloor) playerVelocity.y = JUMP_FORCE;
+                    lastTapTime = currentTime;
+                }
+                if (touch.clientX < halfWidth) { 
+                    if (moveTouchID === -1) {
+                        moveTouchID = touch.identifier;
+                        moveOrigin = { x: touch.clientX, y: touch.clientY };
+                        moveInput = { x: 0, y: 0 };
+                    }
+                } else { 
+                    if (lookTouchID === -1) {
+                        lookTouchID = touch.identifier;
+                        lookOrigin = { x: touch.clientX, y: touch.clientY };
+                    }
+                }
+            }
+        }, {passive: false});
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isGameReady || startScreen.style.opacity !== '0' || isPopupOpen) return;
+            e.preventDefault();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === moveTouchID) {
+                    const deltaX = touch.clientX - moveOrigin.x;
+                    const deltaY = touch.clientY - moveOrigin.y;
+                    const maxRadius = 50; 
+                    moveInput.x = Math.max(-1, Math.min(1, deltaX / maxRadius));
+                    moveInput.y = Math.max(-1, Math.min(1, -deltaY / maxRadius)); 
+                }
+                if (touch.identifier === lookTouchID) {
+                    const deltaX = touch.clientX - lookOrigin.x;
+                    const deltaY = touch.clientY - lookOrigin.y;
+                    const sensitivity = 0.005;
+                    camera.rotation.y -= deltaX * sensitivity;
+                    camera.rotation.x -= deltaY * sensitivity;
+                    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+                    lookOrigin.x = touch.clientX;
+                    lookOrigin.y = touch.clientY;
+                }
+            }
+        }, {passive: false});
+
+        document.addEventListener('touchend', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === moveTouchID) { moveTouchID = -1; moveInput = { x: 0, y: 0 }; }
+                if (touch.identifier === lookTouchID) lookTouchID = -1;
+            }
+        });
+
+        // --- 6. LOAD MODEL ---
+        const loader = new GLTFLoader();
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+        loader.setDRACOLoader(dracoLoader);
+        const ktx2Loader = new KTX2Loader();
+        ktx2Loader.setTranscoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/basis/');
+        ktx2Loader.detectSupport(renderer);
+        loader.setKTX2Loader(ktx2Loader);
+
+        const guardianDialogues = [
+            "Welcome back, Kunjaama! Let me find the keys...",
+            "Ah, here they are. The lock is a bit stiff...",
+            "Forgive me, Kunjol. This heavy door is stuck again...",
+            "Just a moment, Kunji. Let me push it harder...",
+            "I'll switch on the lights for you, Madamji.",
+            "Kunjithaatha is opening it now! Let me set this right.",
+            "The door is open. Welcome home, Kunjaama."
+        ];
+
+        loader.load('model.glb', 
+            (gltf) => {
+                const model = gltf.scene;
+                const ghostRequests = [];
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        const name = child.name.toLowerCase();
+                        
+                        // ADD "im" TO DETECTOR
+                        if (name.includes("book") || name.includes("radio") || name.includes("typewriter") || name.includes("11.003") || name.startsWith("im")) {
+                            interactableObjects.push(child);
+                        }
+                        
+                        if (name.includes("radio")) {
+                            radioObject = child;
+                        }
+
+                        const isTransparent = child.material.transparent === true || child.material.opacity < 1.0;
+                        const isTargetName = name.includes("corridor volume") || name.includes("object077") || name.includes("volume_ligiht") || name.includes("ray");
+
+                        if (isTargetName || isTransparent) {
+                            ghostRequests.push({ mesh: child, parent: child.parent });
+                        }
+                    }
+                });
+
+                ghostRequests.forEach(item => item.mesh.removeFromParent());
+                loadingText.innerText = guardianDialogues[6]; 
+                
+                setTimeout(() => {
+                    worldOctree.fromGraphNode(model);
+                    ghostRequests.forEach(item => { if (item.parent) item.parent.add(item.mesh); });
+                    model.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+
+                    scene.add(model);
+                    playerCollider.start.copy(SPAWN_POINT);
+                    playerCollider.end.copy(SPAWN_POINT).add(new THREE.Vector3(0, PLAYER_HEIGHT, 0));
+                    
+                    // ADD DOOR HITBOX (Blender Coordinates)
+                    createHitbox("door_hitbox", 16.197, 1.0067, -0.005, 0.111, 2.35, 1.63);
+
+                    for(let i=0; i<5; i++) { playerCollisions(); }
+                    camera.position.copy(playerCollider.end);
+
+                    if (gltf.animations.length > 0) {
+                        const mixer = new THREE.AnimationMixer(model);
+                        gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+                        scene.userData.mixer = mixer;
+                    }
+
+                    loaderScreen.style.display = 'none';
+                    startScreen.style.display = 'flex';
+                    isGameReady = true;
+                }, 500);
+            },
+            (xhr) => {
+                const percent = Math.round((xhr.loaded / xhr.total) * 100);
+                let dialogueIndex = 0;
+                if (percent > 15) dialogueIndex = 1;
+                if (percent > 30) dialogueIndex = 2;
+                if (percent > 50) dialogueIndex = 3;
+                if (percent > 70) dialogueIndex = 4;
+                if (percent > 85) dialogueIndex = 5;
+                loadingText.innerText = `${guardianDialogues[dialogueIndex]} (${percent}%)`;
+                document.getElementById('progress-fill').style.width = `${percent}%`;
+            },
+            (error) => { 
+                console.error('An error occurred:', error); 
+                loadingText.innerText = "Forgive me, Kunjaama. I cannot open the gate (Error!)";
+                document.getElementById('error-msg').innerText = "Is 'model.glb' uploaded?";
+            }
+        );
+
+        function playerCollisions() {
+            const result = worldOctree.capsuleIntersect(playerCollider);
+            playerOnFloor = false;
+            if (result) {
+                playerOnFloor = result.normal.y > 0;
+                if (!playerOnFloor) {
+                    playerVelocity.addScaledVector(result.normal, - result.normal.dot(playerVelocity));
+                }
+                playerCollider.translate(result.normal.multiplyScalar(result.depth));
+            }
+        }
+
+        function updatePlayer(deltaTime) {
+            let damping = Math.exp(- 4 * deltaTime) - 1;
+            if (!playerOnFloor) { playerVelocity.y -= GRAVITY * deltaTime; damping *= 0.1; }
+            playerVelocity.addScaledVector(playerVelocity, damping);
+            const deltaPosition = playerVelocity.clone().multiplyScalar(deltaTime);
+            playerCollider.translate(deltaPosition);
+            playerCollisions();
+
+            const speed = Math.sqrt(playerVelocity.x * playerVelocity.x + playerVelocity.z * playerVelocity.z);
+            if (playerOnFloor && speed > 0.1) { headBobTimer += deltaTime * BOB_FREQUENCY; } 
+            else { headBobTimer = 0; }
+            camera.position.copy(playerCollider.end);
+            camera.position.y += Math.sin(headBobTimer) * BOB_AMPLITUDE;
+        }
+
+        function getForwardVector() {
+            camera.getWorldDirection(playerDirection);
+            playerDirection.y = 0;
+            playerDirection.normalize();
+            return playerDirection;
+        }
+
+        function getSideVector() {
+            camera.getWorldDirection(playerDirection);
+            playerDirection.y = 0;
+            playerDirection.normalize();
+            playerDirection.cross(camera.up);
+            return playerDirection;
+        }
+
+        function controls(deltaTime) {
+            const maxSpeedDelta = deltaTime * (playerOnFloor ? PLAYER_SPEED : 8);
+            if (keyStates['KeyW']) playerVelocity.add(getForwardVector().multiplyScalar(maxSpeedDelta));
+            if (keyStates['KeyS']) playerVelocity.add(getForwardVector().multiplyScalar(-maxSpeedDelta));
+            if (keyStates['KeyA']) playerVelocity.add(getSideVector().multiplyScalar(-maxSpeedDelta));
+            if (keyStates['KeyD']) playerVelocity.add(getSideVector().multiplyScalar(maxSpeedDelta));
+            if (playerOnFloor && keyStates['Space']) playerVelocity.y = JUMP_FORCE;
+            if (moveInput.y !== 0 || moveInput.x !== 0) {
+                playerVelocity.add(getForwardVector().multiplyScalar(maxSpeedDelta * moveInput.y));
+                playerVelocity.add(getSideVector().multiplyScalar(maxSpeedDelta * moveInput.x));
+            }
+        }
+
+        const clock = new THREE.Clock();
+        const STEPS_PER_FRAME = 5;
+
+        // --- UPDATED ANIMATE LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // OPTIMIZATION: If Diary/Chat is Open, PAUSE physics/rendering!
+            if (isDiaryOpen) return; 
+
+            const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
+            if (isGameReady && startScreen.style.display !== 'none') {
+                if (scene.userData.mixer) scene.userData.mixer.update(deltaTime * STEPS_PER_FRAME);
+            }
+            else if (isGameReady) {
+                if (!isPopupOpen) {
+                    for (let i = 0; i < STEPS_PER_FRAME; i++) {
+                        controls(deltaTime);
+                        updatePlayer(deltaTime);
+                    }
+                }
+                if (scene.userData.mixer) scene.userData.mixer.update(deltaTime * STEPS_PER_FRAME);
+            }
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        
+    </script>
+</body>
+</html>
