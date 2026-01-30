@@ -19,6 +19,42 @@
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     
     <style>
+
+        /* 1. FIX SCROLLING IN DIARY */
+        #diary-body {
+            position: relative;
+            width: 100%; height: 100%;
+            display: block; 
+            padding: 100px 10% 80px 10%; 
+            box-sizing: border-box;
+            z-index: 5001;
+            overflow-y: auto; /* Allow scroll */
+            text-align: left;
+            -webkit-overflow-scrolling: touch; /* smooth mobile scroll */
+            touch-action: pan-y !important;    /* VITAL: Allows vertical scroll */
+        }
+
+        /* 2. PHOTOGRAPH STYLE FOR DIARY IMAGES */
+        #zoom-display-img {
+            width: auto; height: auto;
+            max-width: 85vw; max-height: 70vh; /* Fit comfortably */
+            object-fit: contain;
+            
+            /* POLAROID / PHOTO LOOK */
+            background-color: white;
+            border: 12px solid #fff;
+            border-bottom: 50px solid #fff; /* Thick bottom like a photo */
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); /* Deep shadow */
+            transform: rotate(-2deg); /* Slight tilt */
+            
+            animation: photoPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes photoPop {
+            from { transform: scale(0.8) rotate(0deg); opacity: 0; }
+            to { transform: scale(1) rotate(-2deg); opacity: 1; }
+        }
         /* --- GLOBAL STYLES --- */
         html, body {
             margin: 0; padding: 0;
@@ -166,7 +202,7 @@
             font-size: 18px; cursor: pointer;
         }
 
-        #diary-body {
+       #diary-body {
             position: relative;
             width: 100%; height: 100%;
             display: block; 
@@ -175,6 +211,8 @@
             z-index: 5001;
             overflow-y: auto; 
             text-align: left;
+            
+           
         }
 
         .fade-content { animation: fadeIn 0.5s ease-in-out; }
@@ -188,7 +226,7 @@
         }
 
         #diary-text { 
-            font-size: 24px; line-height: 1.8; text-align: left; width: 100%; 
+            font-size: 16px; line-height: 1.8; text-align: left; width: 100%; 
             color: #2c3e50; font-family: 'Indie Flower', cursive; white-space: normal;
         }
         
@@ -200,9 +238,8 @@
             height: auto; border-radius: 5px; transform: rotate(-1deg);
         }
         
-        .img-right { float: right; margin-left: 30px; transform: rotate(2deg); width: 40%; }
-        .img-left { float: left; margin-right: 30px; transform: rotate(-2deg); width: 40%; }
-        .img-center { margin: 40px auto; width: 80%; max-width: 600px; transform: rotate(0deg); }
+.img-right { float: right; margin-left: 15px; transform: rotate(2deg); width: 55%; }
+        .img-left { float: left; margin-right: 15px; transform: rotate(-2deg); width: 55%; }        .img-center { margin: 40px auto; width: 80%; max-width: 600px; transform: rotate(0deg); }
 
         .txt-big { font-size: 30px; font-weight: bold; color: #d35400; }
         .txt-small { font-size: 18px; color: #7f8c8d; font-style: italic; }
@@ -210,12 +247,21 @@
 
         @media (max-width: 768px) {
             #diary-body { padding: 100px 5% 80px 5%; }
-            #diary-text { font-size: 20px; }
+            #diary-text { font-size: 13px; }
             .img-right, .img-left { float: none; width: 100%; margin: 20px 0; }
         }
-
-        .nav-zone { position: absolute; top: 60px; bottom: 0; width: 25%; z-index: 5005; }
-        .nav-left { left: 0; } .nav-right { right: 0; }
+.collage-img {
+            border: 8px solid white; box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+            margin: 30px auto; display: block; width: 100%; max-width: 500px; 
+            height: auto; border-radius: 5px; transform: rotate(-1deg);
+            cursor: zoom-in; /* Show magnifying glass cursor */
+        }
+/* CHANGE width from 25% to 15% */
+        .nav-zone { 
+            position: absolute; top: 60px; bottom: 0; 
+            width: 15%; /* Smaller touch area */
+            z-index: 5005; 
+        }        .nav-left { left: 0; } .nav-right { right: 0; }
 
         /* --- TYPEWRITER OVERLAY --- */
         #typewriter-overlay {
@@ -289,7 +335,7 @@
         .shake-anim { animation: paperJiggle 0.1s ease-out; }
         @keyframes paperJiggle { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
 
-        /* --- FRAME IMAGE VIEWER --- */
+       /* --- FRAME IMAGE VIEWER --- */
         #frame-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 6000;
@@ -303,7 +349,7 @@
             max-width: 90%; max-height: 80vh;
             display: flex; flex-direction: column; align-items: center;
             animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        } 
 
         .frame-container img { max-width: 100%; max-height: 60vh; border: 2px solid #8d6e63; display: block; }
 
@@ -508,41 +554,69 @@
         }
         @media screen and (orientation: portrait) and (max-width: 900px) { #rotate-warning { display: flex; } }
 
-        /* --- MOBILE: MAKE CAT TALK BUBBLE SMALLER --- */
+     /* --- MOBILE: SMALLER POPUPS & CHAT --- */
         @media (max-width: 800px) {
+            
+            /* 1. Speech Bubble (Floating text) */
             #cat-speech-bubble {
-                bottom: 15%;          /* Move it down a bit */
-                width: 90%;           /* Use more width to reduce height */
-                max-width: 300px;     /* Cap the size */
-                padding: 10px 15px;   /* Reduce padding inside */
-                font-size: 14px;      /* Smaller text (was 20px) */
-                border-width: 2px;    /* Thinner border */
-                line-height: 1.3;     /* Tighter lines */
+                bottom: 15%; width: 85%; max-width: 280px;
+                padding: 8px 12px; /* Less padding */
+                font-size: 12px;   /* Reduced from 14px */
+                line-height: 1.2;
+                border-width: 2px;
             }
 
-            /* Make the little triangle pointer smaller too */
-            #cat-speech-bubble::after {
-                border-width: 8px 8px 0; 
-                bottom: -8px;
-                margin-left: -8px;
+            /* 2. Tutorial Popups (Posters) */
+            .story-popup h3 { 
+                font-size: 14px; /* Reduced from 16px */
+                margin-bottom: 2px; 
             }
-            /* --- MOBILE: SMALLER CAT TRIGGER BUTTON --- */
-            #cat-trigger-btn {
-                width: 90px !important;   /* Reduced from 120px */
-                height: 70px !important;  /* Reduced from 100px */
-                bottom: 0px !important;  /* Keep it close to bottom */
+            
+            .story-popup p { 
+                font-size: 10px; /* Reduced from 12px */
+                line-height: 1.2;
+                margin: 3px 0;
+            }
+
+            .cat-header { font-size: 9px; } /* Tiny header */
+            
+            .popup-left { flex: 0 0 30%; } /* Smaller image section */
+            
+            .close-tutorial {
+                padding: 6px;
+                font-size: 12px; /* Smaller button text */
             }
         }
 
-
-        /* --- FINAL ENDING SCREENS --- */
+    /* --- FINAL ENDING SCREENS (Scrollable Fix) --- */
         #final-mandhi-screen, #final-troll-screen {
-            display: none; /* Hidden by default */
+            display: none; 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000; z-index: 10000; /* On top of everything */
-            flex-direction: column; justify-content: center; align-items: center;
+            background: #000000; 
+            z-index: 10000; 
+            
+            /* Layout */
+            flex-direction: column; 
+            justify-content: center; /* Center if space allows */
+            align-items: center;
             text-align: center; color: white;
+            
+            /* SCROLLING ENABLED */
+            overflow-y: auto;                 /* Allow vertical scroll */
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on mobile */
+            touch-action: pan-y !important;    /* Allow finger scrolling */
+            padding: 40px 20px;               /* Space at top/bottom */
+            box-sizing: border-box;
+            
             animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Safe centering for tall content (Prevents top getting cut off) */
+        #final-mandhi-screen::before, #final-mandhi-screen::after {
+            content: '';
+            display: block;
+            flex-shrink: 0;
+            height: 20px; /* Minimum spacer */
         }
 
         .final-img {
@@ -575,7 +649,52 @@
         }
 
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-        
+        /* --- REDESIGNED DIARY ZOOM (Cream BG + Smooth Anim) --- */
+        #diary-zoom-overlay {
+            display: none; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(253, 246, 227, 0.98); /* Diary Cream Color */
+            z-index: 7000;
+            justify-content: center; align-items: center; flex-direction: column;
+            backdrop-filter: blur(2px);
+        }
+
+        /* The Image */
+        #zoom-display-img {
+            width: auto; height: auto;
+            max-width: 90vw; max-height: 80vh;
+            object-fit: contain;
+            
+            /* Design: White Border + Small Shadow */
+            border: 10px solid #ffffff; 
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(141, 110, 99, 0.3); /* Soft brownish shadow */
+            
+            /* Initial State for Animation */
+            transform: scale(0.8);
+            opacity: 1;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        /* Animation Classes */
+        .zoom-in { transform: scale(1) !important; opacity: 1 !important; }
+        .zoom-out { transform: scale(0.8) !important; opacity: 0 !important; }
+
+        /* The Button (Matches Diary Close Button) */
+        #close-zoom-btn {
+            position: absolute; top: 20px; right: 20px;
+            width: 45px; height: 45px;
+            background: #e74c3c; /* Red */
+            color: white; 
+            border: 2px solid white; 
+            border-radius: 50%;
+            font-size: 20px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 7001;
+            transition: transform 0.2s;
+        }
+        #close-zoom-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -599,16 +718,7 @@
         <i class="fa-solid fa-question"></i>
     </div>
 
-    <div id="cat-trigger-btn">
-        <img src="cat_transparent.png" alt="Chat with Babblu">
-    </div>
 
-    <div id="quick-chat-overlay">
-        <div class="quick-input-box">
-            <input type="text" id="quick-input" placeholder="Say something to Babblu... 🐾">
-            <button id="quick-send-btn">➤</button>
-        </div>
-    </div>
 
     <div id="diary-overlay">
         <div class="diary-header">
@@ -616,8 +726,7 @@
             <button id="close-diary-btn">✕</button>
         </div>
         <div id="diary-body"></div>
-        <div class="nav-zone nav-left" id="prev-page-zone"></div>
-        <div class="nav-zone nav-right" id="next-page-zone"></div>
+      
     </div>
     
 
@@ -641,6 +750,10 @@
             <img id="frame-display-img" src="" alt="Memory">
             <a id="download-frame-btn" href="#" download>Keep this Memory 🌸</a>
         </div>
+    </div>
+    <div id="diary-zoom-overlay">
+        <button id="close-zoom-btn">✕</button>
+        <img id="zoom-display-img" src="" alt="Zoomed Image">
     </div>
 
     <div id="controls-tutorial" class="story-popup">
@@ -823,13 +936,9 @@
         const BOB_FREQUENCY = 12;  
         const BOB_AMPLITUDE = 0.01; 
 
-        // --- GROQ API SETUP ---
-        const GROQ_API_KEY = "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"; 
-        const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-        const GROQ_MODEL = "llama-3.3-70b-versatile";
-
-        let chatContext = []; 
-        const MAX_HISTORY = 20; 
+        const zoomOverlay = document.getElementById('diary-zoom-overlay');
+const zoomImg = document.getElementById('zoom-display-img');
+const closeZoomBtn = document.getElementById('close-zoom-btn');
 
         // --- INITIALIZE EMAILJS ---
         emailjs.init("ikJuGIV_vM8wkLR4o");
@@ -921,8 +1030,6 @@
         const pageIndicator = document.getElementById('page-indicator');
         const openDiaryBtn = document.getElementById('open-diary-btn');
         const closeDiaryBtn = document.getElementById('close-diary-btn');
-        const prevPageZone = document.getElementById('prev-page-zone');
-        const nextPageZone = document.getElementById('next-page-zone');
 
         // Typewriter Elements
         const typewriterOverlay = document.getElementById('typewriter-overlay');
@@ -948,11 +1055,6 @@
         const stayBtn = document.getElementById('stay-btn');
         const leaveBtn = document.getElementById('leave-btn');
 
-        // Chat Elements (Simple Input)
-        const catTriggerBtn = document.getElementById('cat-trigger-btn');
-        const quickChatOverlay = document.getElementById('quick-chat-overlay');
-        const quickInput = document.getElementById('quick-input');
-        const quickSendBtn = document.getElementById('quick-send-btn');
 
         // --- PLAYLISTS ---
         const bgPlaylist = [
@@ -1604,7 +1706,7 @@
             diaryBody.scrollTop = 0; // SCROLL TO TOP FIX
         }
 
-        openDiaryBtn.addEventListener('click', () => {
+      openDiaryBtn.addEventListener('click', () => {
             bookEntryModal.style.display = 'none';
             diaryOverlay.style.display = 'flex';
             currentDiaryPage = 0;
@@ -1612,31 +1714,28 @@
             renderDiaryPage(0);
             isDiaryOpen = true;
             unlockMouseForPopup();
-        });
 
-        closeDiaryBtn.addEventListener('click', () => {
+            // --- FIX: ENABLE SCROLLING ---
+            document.body.style.touchAction = 'auto'; 
+            document.body.style.overflow = 'hidden'; // Keep body stuck, let diary scroll
+        });
+closeDiaryBtn.addEventListener('click', () => {
             diaryOverlay.style.display = 'none';
             isDiaryOpen = false;
             lockMouseAfterPopup();
+
+            // --- FIX: DISABLE SCROLLING (Back to Game Mode) ---
+            document.body.style.touchAction = 'none';
+
             // Try to advance timeline if waiting on book
             if (currentTimelineStep === 3 && hasClickedBook && hasOpenedDiary) {
                 scheduleNextEvent(2000); 
             }
         });
 
-        nextPageZone.addEventListener('click', () => {
-            if(currentDiaryPage < diaryContent.length - 1) {
-                currentDiaryPage++;
-                renderDiaryPage(currentDiaryPage);
-            }
-        });
+      
 
-        prevPageZone.addEventListener('click', () => {
-            if(currentDiaryPage > 0) {
-                currentDiaryPage--;
-                renderDiaryPage(currentDiaryPage);
-            }
-        });
+        
 
         // --- TYPEWRITER INTERACTION LOGIC ---
         
@@ -1751,93 +1850,9 @@
             if (!('ontouchstart' in window)) { document.body.requestPointerLock(); }
         }
 
-        // --- QUICK CHAT INTERFACE LOGIC ---
-        catTriggerBtn.addEventListener('click', () => {
-            quickChatOverlay.style.display = 'flex';
-            isDiaryOpen = true; // Pause game
-            unlockMouseForPopup();
-            quickInput.focus();
-        });
+    
+       
 
-        // Close on background click
-        quickChatOverlay.addEventListener('click', (e) => {
-            if(e.target === quickChatOverlay) {
-                quickChatOverlay.style.display = 'none';
-                isDiaryOpen = false;
-                lockMouseAfterPopup();
-            }
-        });
-
-        // --- GROQ AI CHAT FUNCTIONALITY ---
-        async function fetchGroqChat(userMessage) {
-            if (!GROQ_API_KEY) {
-                return "Meow? (Please add your API Key in the code to chat!) 😿";
-            }
-
-            const systemPrompt = `You are Babblu, the real black cat guardian of this magnificent, real castle. You serve 'The Creator'. You are talking to 'Kunjaama' (also called Kunju, Ms. PK, Jaanu, Adeeba, or Panagatuthodiyil). She is the Creator's best friend. Never say 'friend' or 'buddy'. Call her by her specific names. Never say this is a virtual place; it is real. Be cute, witty, and protective. Do NOT use asterisks (*) for actions. Use cat emojis.`;
-
-            try {
-                // Construct message history for context
-                const messages = [
-                    { role: "system", content: systemPrompt },
-                    ...chatContext,
-                    { role: "user", content: userMessage }
-                ];
-
-                const response = await fetch(GROQ_ENDPOINT, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${GROQ_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: GROQ_MODEL,
-                        messages: messages,
-                        temperature: 0.7,
-                        max_tokens: 60
-                    })
-                });
-                const data = await response.json();
-                let cleanReply = data.choices[0].message.content;
-                
-                // FORCE REMOVE ASTERISKS AND TRIM
-                cleanReply = cleanReply.replace(/\*.*?\*/g, "").trim(); 
-
-                // Update Memory
-                chatContext.push({ role: "user", content: userMessage });
-                chatContext.push({ role: "assistant", content: cleanReply });
-                // Keep only last 20 messages
-                if(chatContext.length > MAX_HISTORY) chatContext = chatContext.slice(-MAX_HISTORY);
-
-                return cleanReply;
-
-            } catch (error) {
-                console.error("Groq Error:", error);
-                return "The spirits are quiet today... try again later! 😿";
-            }
-        }
-
-        quickSendBtn.addEventListener('click', async () => {
-            const text = quickInput.value.trim();
-            if(!text) return;
-
-            // 1. Close Overlay Immediately
-            quickChatOverlay.style.display = 'none';
-            isDiaryOpen = false;
-            lockMouseAfterPopup();
-            
-            // 2. Show "Hhhaaa.." in Bubble
-            showSpeech("Hhhaaa.. 🐾");
-            
-            // 3. Fetch Response
-            const aiResponse = await fetchGroqChat(text);
-            
-            // 4. Update Bubble
-            showSpeech(aiResponse);
-            
-            // Clear input for next time
-            quickInput.value = "";
-        });
 
         // --- TRIGGER STATIC CHAT BUBBLES ---
         function triggerRandomCatTalk(isTimelineEvent = false) {
@@ -2221,9 +2236,6 @@
             
             musicLottie.play();
 
-            // SHOW CAT BUTTON ON START
-            document.getElementById('cat-trigger-btn').classList.add('visible');
-            document.getElementById('cat-trigger-btn').style.display = 'flex';
 
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch((err) => { console.log(err); });
@@ -2320,26 +2332,21 @@
             }
         }
 
-        function checkMobileInteraction(touchX, touchY) {
-            const mouse = new THREE.Vector2();
-            mouse.x = (touchX / window.innerWidth) * 2 - 1;
-            mouse.y = -(touchY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(interactableObjects);
-            if (intersects.length > 0 && intersects[0].distance < 6) {
-                handleObjectClick(intersects[0].object); 
-                return true; 
-            }
-            return false;
-        }
+      
 
-        document.addEventListener('mousedown', () => { 
-            if (isGameReady && startScreen.style.opacity === '0' && !isPopupOpen) {
-                if (document.pointerLockElement !== document.body) { document.body.requestPointerLock(); } 
-                else { checkDesktopInteraction(true); } 
-            }
+     // --- NEW TAP DETECTION (Fixes Dragging Issue) ---
+        let startX = 0;
+        let startY = 0;
+        const TAP_THRESHOLD = 10; 
+
+        // 1. Remember where touch started
+        document.addEventListener('pointerdown', (e) => {
+            startX = e.clientX;
+            startY = e.clientY;
         });
 
+        // 2. Only interact if finger didn't move (Tap)
+     
         document.body.addEventListener('mousemove', (event) => {
             if (document.pointerLockElement === document.body && !isPopupOpen) {
                 camera.rotation.y -= event.movementX / 500;
@@ -2347,25 +2354,33 @@
                 camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
             }
         });
-
+// --- CORRECTED TOUCH START LISTENER ---
         document.addEventListener('touchstart', (e) => {
             if (!isGameReady || startScreen.style.opacity !== '0' || isPopupOpen) return;
+            
+            // Note: We removed the checkMobileInteraction line here because it was causing the crash.
+            
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const touch = e.changedTouches[i];
-                if (checkMobileInteraction(touch.clientX, touch.clientY)) continue; 
                 const halfWidth = window.innerWidth / 2;
+
+                // Right Side = JUMP (Double Tap)
                 if (touch.clientX > halfWidth) {
                     const currentTime = new Date().getTime();
                     if (currentTime - lastTapTime < 300 && playerOnFloor) playerVelocity.y = JUMP_FORCE;
                     lastTapTime = currentTime;
                 }
+
+                // Left Side = MOVE
                 if (touch.clientX < halfWidth) { 
                     if (moveTouchID === -1) {
                         moveTouchID = touch.identifier;
                         moveOrigin = { x: touch.clientX, y: touch.clientY };
                         moveInput = { x: 0, y: 0 };
                     }
-                } else { 
+                } 
+                // Right Side = LOOK
+                else { 
                     if (lookTouchID === -1) {
                         lookTouchID = touch.identifier;
                         lookOrigin = { x: touch.clientX, y: touch.clientY };
@@ -2375,8 +2390,14 @@
         }, {passive: false});
 
         document.addEventListener('touchmove', (e) => {
+            // 1. CRITICAL SCROLL FIX: If Diary is open, let browser handle scrolling!
+            if (isDiaryOpen) return; 
+
+            // 2. Standard Game Logic (Block scrolling for Joystick)
             if (!isGameReady || startScreen.style.opacity !== '0' || isPopupOpen) return;
-            e.preventDefault();
+            
+            e.preventDefault(); // This blocks scrolling, so we skip it above if diary is open
+            
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const touch = e.changedTouches[i];
                 if (touch.identifier === moveTouchID) {
@@ -2590,7 +2611,125 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        
+      // =========================================================
+        // --- MASTER INTERACTION HANDLER (Game & Diary) ---
+        // =========================================================
+
+        let tapStartX = 0;
+        let tapStartY = 0;
+        const TAP_LIMIT = 10; 
+
+        // --- 1. GLOBAL TOUCH START ---
+        document.addEventListener('pointerdown', (e) => {
+            tapStartX = e.clientX;
+            tapStartY = e.clientY;
+        });
+
+        // --- 2. GLOBAL TOUCH END ---
+        document.addEventListener('pointerup', (e) => {
+            
+            // CALCULATE MOVEMENT (Drag vs Tap)
+            const diffX = Math.abs(e.clientX - tapStartX);
+            const diffY = Math.abs(e.clientY - tapStartY);
+            const isDrag = (diffX > TAP_LIMIT || diffY > TAP_LIMIT);
+
+            // =================================================
+            // SCENARIO A: DIARY IS OPEN
+            // =================================================
+            if (isDiaryOpen) {
+                // If Dragged (Scrolled), DO NOTHING. 
+                // The CSS 'touch-action: pan-y' handles the scrolling naturally.
+                if (isDrag) return;
+
+                // --- TAP LOGIC (No movement) ---
+                
+                // 1. Close Button? (Let default click work)
+                if (e.target.id === 'close-diary-btn') return;
+
+                // 2. Image? -> Show Zoomed Photo
+                if (e.target.tagName === 'IMG' && e.target.classList.contains('collage-img')) {
+                    showDiaryZoom(e.target.src);
+                    return;
+                }
+
+                // 3. Screen Edges? -> Turn Page
+                const screenWidth = window.innerWidth;
+                const tapX = e.clientX;
+
+                // Left 20% -> Previous Page
+                if (tapX < screenWidth * 0.2) {
+                    if (currentDiaryPage > 0) {
+                        currentDiaryPage--;
+                        renderDiaryPage(currentDiaryPage);
+                    }
+                } 
+                // Right 20% -> Next Page
+                else if (tapX > screenWidth * 0.8) {
+                    if (currentDiaryPage < diaryContent.length - 1) {
+                        currentDiaryPage++;
+                        renderDiaryPage(currentDiaryPage);
+                    }
+                }
+                return; // Stop here, don't trigger game clicks
+            }
+
+            // =================================================
+            // SCENARIO B: MAIN GAME (3D WORLD)
+            // =================================================
+            
+            // Safety Check
+            if (!isGameReady || startScreen.style.display !== 'none' || isPopupOpen) return;
+
+            // If Dragged (Looked around), STOP.
+            if (isDrag) return;
+
+            // --- CLICK LOGIC ---
+
+            // Desktop (Mouse Locked): Use Center Crosshair
+            if (!('ontouchstart' in window) && document.pointerLockElement === document.body) {
+                raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+                checkIntersects(false);
+            } 
+            
+            // Mobile (Touch): Use Exact Finger Position
+            else {
+                // Lock screen if needed (Desktop only)
+                if (!('ontouchstart' in window) && document.pointerLockElement !== document.body) {
+                    document.body.requestPointerLock();
+                    return; 
+                }
+
+                // Raycast from FINGER position
+                const mouse = new THREE.Vector2();
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                checkIntersects(true); // True = Mobile Tolerance
+            }
+        });
+
+        // --- HELPER: CHECK OBJECT CLICKS ---
+        function checkIntersects(isMobile) {
+            const reach = isMobile ? 6 : 4; 
+            const intersects = raycaster.intersectObjects(interactableObjects);
+            if (intersects.length > 0 && intersects[0].distance < reach) {
+                handleObjectClick(intersects[0].object);
+            }
+        }
+
+        // --- HELPER: NEW DIARY ZOOM (Photo Style) ---
+        function showDiaryZoom(src) {
+            zoomImg.src = src; 
+            zoomOverlay.style.display = 'flex';
+            if (document.pointerLockElement) document.exitPointerLock();
+            isPopupOpen = true;
+        }
+
+        closeZoomBtn.addEventListener('click', () => {
+            zoomOverlay.style.display = 'none';
+            // Do NOT set isPopupOpen = false here, because Diary is still open behind it.
+        });
     </script>
 </body>
 </html>
